@@ -125,7 +125,6 @@ export function SharedSetPage() {
               index={idx + 1}
               expanded={expandedId === song.id}
               onToggle={() => setExpandedId(expandedId === song.id ? null : song.id)}
-              t={t}
             />
           ))}
         </div>
@@ -141,10 +140,10 @@ interface SongCardProps {
   index: number
   expanded: boolean
   onToggle: () => void
-  t: (k: string, o?: object) => string
 }
 
-function SongCard({ song, index, expanded, onToggle, t }: SongCardProps) {
+function SongCard({ song, index, expanded, onToggle }: SongCardProps) {
+  const { t } = useTranslation()
   const [coverFailed, setCoverFailed] = useState(false)
   const [showPractice, setShowPractice] = useState(false)
 

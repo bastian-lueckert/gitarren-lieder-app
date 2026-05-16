@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, type TFunction } from 'react-i18next'
 import { ArrowLeft, CheckCircle2, Circle, Play, Music, Trash2 } from 'lucide-react'
 import { usePracticePlanStore } from '@/store/practicePlanStore'
 import { useSongStore } from '@/store/songStore'
 import { Button } from '@/components/ui/button'
 import { formatDurationSec } from '@/lib/utils'
 
-function planDateLabel(dateStr: string, t: (k: string, o?: object) => string): string {
+function planDateLabel(dateStr: string, t: TFunction): string {
   const today = new Date().toISOString().slice(0, 10)
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
   if (dateStr === today) return t('plan.today')
@@ -43,13 +43,13 @@ export function PracticePlanPage() {
   const progress = total > 0 ? Math.round((done / total) * 100) : 0
 
   async function handleToggle(songId: string) {
-    const wasDone = plan.completedIds.includes(songId)
-    await toggleCompleted(plan.id, songId)
+    const wasDone = plan!.completedIds.includes(songId)
+    await toggleCompleted(plan!.id, songId)
     if (!wasDone) await markPracticed(songId)
   }
 
   async function handleDelete() {
-    await deletePlan(plan.id)
+    await deletePlan(plan!.id)
     navigate('/')
   }
 
