@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { Plus, Download, Search, Guitar, ListMusic, ChevronRight, Clock, CalendarDays, CheckCircle2, Dices, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 type SortKey = 'title' | 'artist' | 'createdAt' | 'lastPracticed'
 type Tab = 'songs' | 'sets' | 'plan'
 
-function planDateLabel(dateStr: string, t: TFunction): string {
+function planDateLabel(dateStr: string, t: ReturnType<typeof useTranslation>['t']): string {
   const today = new Date().toISOString().slice(0, 10)
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
   if (dateStr === today) return t('plan.today')

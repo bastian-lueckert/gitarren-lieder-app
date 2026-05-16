@@ -1,12 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useTranslation, type TFunction } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, CheckCircle2, Circle, Play, Music, Trash2 } from 'lucide-react'
 import { usePracticePlanStore } from '@/store/practicePlanStore'
 import { useSongStore } from '@/store/songStore'
 import { Button } from '@/components/ui/button'
 import { formatDurationSec } from '@/lib/utils'
 
-function planDateLabel(dateStr: string, t: TFunction): string {
+function planDateLabel(dateStr: string, t: ReturnType<typeof useTranslation>['t']): string {
   const today = new Date().toISOString().slice(0, 10)
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
   if (dateStr === today) return t('plan.today')
