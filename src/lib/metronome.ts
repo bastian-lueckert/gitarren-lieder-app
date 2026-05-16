@@ -204,7 +204,7 @@ export async function startMetronome(
 
 export function stopMetronome() {
   Tone.getTransport().stop()
-  sequence?.stop()
+  try { sequence?.stop(Math.max(0, Tone.now())) } catch { /* ignore float precision errors */ }
   disposeSynths()
 }
 

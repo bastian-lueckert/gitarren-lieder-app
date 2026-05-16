@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Song, SongFormData, DrumPattern, TimeSignature } from '@/types/song'
+import { parseDurationInput, formatDurationSec } from '@/lib/utils'
 
 const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B',
   'Am', 'Bm', 'Cm', 'Dm', 'Em', 'Fm', 'Gm']
@@ -27,13 +28,18 @@ export function SongForm({ initial, onSave, onCancel }: SongFormProps) {
     lyrics: initial?.lyrics ?? '',
     chords: initial?.chords ?? '',
     bpm: initial?.bpm ?? 120,
+    durationSec: initial?.durationSec,
     timeSignature: initial?.timeSignature ?? '4/4',
     drumPattern: initial?.drumPattern ?? 'rock',
     musicalKey: initial?.musicalKey ?? '',
     capo: initial?.capo ?? 0,
     notes: initial?.notes ?? '',
     tags: initial?.tags ?? [],
+    coverUrl: initial?.coverUrl,
   })
+  const [durationInput, setDurationInput] = useState(
+    initial?.durationSec ? formatDurationSec(initial.durationSec) : ''
+  )
   const [tagInput, setTagInput] = useState('')
 
   function set<K extends keyof SongFormData>(key: K, value: SongFormData[K]) {
@@ -120,13 +126,30 @@ export function SongForm({ initial, onSave, onCancel }: SongFormProps) {
         </div>
       </div>
 
+      <div className="space-y-1.5">
+        <Label htmlFor="duration">{t('song.duration')}</Label>
+        <Input
+          id="duration"
+          value={durationInput}
+          onChange={(e) => {
+            setDurationInput(e.target.value)
+            set('durationSec', parseDurationInput(e.target.value))
+          }}
+          placeholder="3:45"
+          className="w-32"
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>{t('song.key')}</Label>
-          <Select value={form.musicalKey ?? ''} onValueChange={(v) => set('musicalKey', v)}>
-            <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+          <Select
+            value={form.musicalKey || '_none_'}
+            onValueChange={(v) => set('musicalKey', v === '_none_' ? '' : v)}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">—</SelectItem>
+              <SelectItem value="_none_">—</SelectItem>
               {KEYS.map((k) => (
                 <SelectItem key={k} value={k}>{k}</SelectItem>
               ))}

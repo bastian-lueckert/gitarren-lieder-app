@@ -8,6 +8,7 @@ export interface Song {
   lyrics?: string
   chords?: string
   bpm?: number
+  durationSec?: number
   timeSignature?: TimeSignature
   drumPattern?: DrumPattern
   musicalKey?: string
@@ -20,6 +21,8 @@ export interface Song {
   updatedAt: Date
   supabaseId?: string
   mbid?: string
+  coverUrl?: string
+  shareToken?: string
 }
 
 export interface SongFormData {
@@ -28,10 +31,12 @@ export interface SongFormData {
   lyrics?: string
   chords?: string
   bpm?: number
+  durationSec?: number
   timeSignature?: TimeSignature
   drumPattern?: DrumPattern
   musicalKey?: string
   capo?: number
   notes?: string
   tags?: string[]
+  coverUrl?: string
 }

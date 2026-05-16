@@ -1,12 +1,26 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Music, Clock, Gauge, ChevronRight } from 'lucide-react'
+import { Music, Clock, Gauge, Timer, ChevronRight } from 'lucide-react'
 import type { Song } from '@/types/song'
-import { formatDate } from '@/lib/utils'
+import { formatDate, formatDurationSec } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
 interface SongCardProps {
   song: Song
   onClick: () => void
+}
+
+function CoverArt({ url }: { url: string }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return <Music className="h-6 w-6 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+  return (
+    <img
+      src={url}
+      alt=""
+      className="w-full h-full object-cover rounded-lg"
+      onError={() => setFailed(true)}
+    />
+  )
 }
 
 export function SongCard({ song, onClick }: SongCardProps) {
@@ -17,14 +31,23 @@ export function SongCard({ song, onClick }: SongCardProps) {
       onClick={onClick}
       className="w-full flex items-center gap-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all p-4 text-left group"
     >
-      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center group-hover:bg-amber-500/10 transition-colors">
-        <Music className="h-6 w-6 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center group-hover:bg-amber-500/10 transition-colors overflow-hidden">
+        {song.coverUrl
+          ? <CoverArt url={song.coverUrl} />
+          : <Music className="h-6 w-6 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+        }
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-zinc-100 truncate">{song.title}</p>
         <p className="text-sm text-zinc-400 truncate">{song.artist}</p>
         <div className="flex items-center gap-3 mt-1">
+          {song.durationSec && (
+            <span className="flex items-center gap-1 text-xs text-zinc-500">
+              <Timer className="h-3 w-3" />
+              {formatDurationSec(song.durationSec)}
+            </span>
+          )}
           {song.bpm && (
             <span className="flex items-center gap-1 text-xs text-zinc-500">
               <Gauge className="h-3 w-3" />
