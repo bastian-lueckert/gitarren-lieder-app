@@ -82,6 +82,7 @@ export function SongDetailPage() {
   }
 
   const ugUrl = `https://www.ultimate-guitar.com/search.php?search_type=title&value=${encodeURIComponent(`${song.artist} ${song.title}`)}`
+  const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`
 
   return (
     <div className="space-y-6">
@@ -114,6 +115,15 @@ export function SongDetailPage() {
             <Play className="h-4 w-4" />
             {t('practice.title')}
           </Button>
+          <a
+            href={ytUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t('songOfDay.youtube')}
+            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
           <Button variant="ghost" size="icon-sm" onClick={() => exportSongPdf(song)} title={t('share.exportPdf')}>
             <FileDown className="h-4 w-4 text-zinc-400" />
           </Button>

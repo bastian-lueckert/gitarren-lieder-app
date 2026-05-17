@@ -128,6 +128,9 @@ export const en = {
       skipBpm: 'Import without BPM',
       findChords: 'Find chords on Ultimate Guitar →',
       source: 'Source: MusicBrainz + lyrics.ovh + Deezer',
+      searchOrManual: 'Search for a song or fill in manually',
+      manualEntry: 'Fill in manually',
+      backToSearch: 'Back to search',
     },
     auth: {
       signIn: 'Sign In',

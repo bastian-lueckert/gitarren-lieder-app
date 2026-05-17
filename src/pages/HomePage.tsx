@@ -7,13 +7,9 @@ import { useSetStore } from '@/store/setStore'
 import { usePracticePlanStore } from '@/store/practicePlanStore'
 import { getSongOfTheDay } from '@/lib/songOfTheDay'
 import { SongCard } from '@/components/SongCard'
-import { SongForm } from '@/components/SongForm'
-import { ImportDialog } from '@/components/ImportDialog'
+import { AddSongDialog } from '@/components/ImportDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog'
 import type { SongFormData } from '@/types/song'
 import type { PracticePlan } from '@/types/practicePlan'
 import { formatTotalDuration } from '@/lib/utils'
@@ -42,10 +38,8 @@ export function HomePage() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<SortKey>('createdAt')
   const [showAddDialog, setShowAddDialog] = useState(false)
-  const [showImportDialog, setShowImportDialog] = useState(false)
-  const [importPrefill, setImportPrefill] = useState<{ title?: string; artist?: string; mbid?: string; lyrics?: string; bpm?: number; durationSec?: number } | null>(null)
+  const [addDialogInitial, setAddDialogInitial] = useState<{ artist?: string; title?: string } | undefined>()
   const [songsExpanded, setSongsExpanded] = useState(false)
-  const [sodImportOpen, setSodImportOpen] = useState(false)
 
   const COLLAPSE_LIMIT = 7
   const dailySong = getSongOfTheDay()
@@ -74,14 +68,7 @@ export function HomePage() {
 
   async function handleAdd(data: SongFormData) {
     const song = await addSong(data)
-    setShowAddDialog(false)
-    setImportPrefill(null)
     navigate(`/songs/${song.id}`)
-  }
-
-  function handleImport(data: { title: string; artist: string; mbid?: string; lyrics?: string; bpm?: number; durationSec?: number }) {
-    setImportPrefill(data)
-    setShowAddDialog(true)
   }
 
   function setTotalDuration(songIds: string[]) {
@@ -131,16 +118,10 @@ export function HomePage() {
         </div>
 
         {tab === 'songs' ? (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
-              <Download className="h-4 w-4" />
-              {t('songs.import')}
-            </Button>
-            <Button size="sm" onClick={() => { setImportPrefill(null); setShowAddDialog(true) }}>
-              <Plus className="h-4 w-4" />
-              {t('songs.addNew')}
-            </Button>
-          </div>
+          <Button size="sm" onClick={() => { setAddDialogInitial(undefined); setShowAddDialog(true) }}>
+            <Plus className="h-4 w-4" />
+            {t('songs.addNew')}
+          </Button>
         ) : (
           <Button size="sm" onClick={() => navigate('/sets')}>
             <Plus className="h-4 w-4" />
@@ -166,7 +147,7 @@ export function HomePage() {
               {alreadyInLibrary ? (
                 <span className="text-xs text-zinc-500 italic py-1">{t('songOfDay.alreadyInLibrary')}</span>
               ) : (
-                <Button size="sm" onClick={() => setSodImportOpen(true)}>
+                <Button size="sm" onClick={() => { setAddDialogInitial({ artist: dailySong.artist, title: dailySong.title }); setShowAddDialog(true) }}>
                   <Download className="h-4 w-4" />
                   {t('songOfDay.import')}
                 </Button>
@@ -296,33 +277,12 @@ export function HomePage() {
         />
       )}
 
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {importPrefill ? t('import.title') : t('songs.addNew')}
-            </DialogTitle>
-          </DialogHeader>
-          <SongForm
-            initial={importPrefill ?? undefined}
-            onSave={handleAdd}
-            onCancel={() => setShowAddDialog(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <ImportDialog
-        open={showImportDialog}
-        onOpenChange={setShowImportDialog}
-        onImport={handleImport}
-      />
-
-      <ImportDialog
-        open={sodImportOpen}
-        onOpenChange={setSodImportOpen}
-        onImport={handleImport}
-        initialArtist={dailySong.artist}
-        initialTitle={dailySong.title}
+      <AddSongDialog
+        open={showAddDialog}
+        onOpenChange={(open) => { setShowAddDialog(open); if (!open) setAddDialogInitial(undefined) }}
+        onSave={handleAdd}
+        initialArtist={addDialogInitial?.artist}
+        initialTitle={addDialogInitial?.title}
       />
     </div>
   )
