@@ -1,7 +1,36 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(gh *)"
+      "PowerShell(gh *)",
+      "PowerShell(mkdir \"D:\\\\Owncloud\\\\Owncloud\\\\Bastian\\\\Development\\\\_AI\\\\GitarrenLiederAPP\\\\api\" 2>&1)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/lucide-react/package.json'\\).version\\)\")",
+      "Bash(Test-Path *)",
+      "PowerShell(npx vercel --version 2>&1)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Fix TFunction import — use ReturnType<typeof useTranslation>['\\\\''t'\\\\''] instead *)",
+      "Bash(git commit -m 'Add YouTube search link to each song card in overview *)",
+      "Bash(node *)",
+      "Bash(npx vercel *)",
+      "Skill(vercel:deploy)",
+      "Bash(vercel *)",
+      "Bash(npm i *)",
+      "Bash(git tag *)",
+      "Bash(gh release create v1.0.0 --title 'v1.0.0 — Erster Release' --notes ' *)",
+      "Bash(where gh *)",
+      "Bash(winget list *)",
+      "Bash(winget install *)",
+      "Bash(refreshenv)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "PowerShell(gh auth *)",
+      "Bash(curl -s \"https://gitarren-lieder-app.vercel.app/api/ug-popular\")"
     ]
   }
 }

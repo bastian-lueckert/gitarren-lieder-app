@@ -23,6 +23,7 @@ export interface Song {
   mbid?: string
   coverUrl?: string
   shareToken?: string
+  difficulty?: number  // 1–5
 }
 
 export interface SongFormData {
@@ -39,4 +40,5 @@ export interface SongFormData {
   notes?: string
   tags?: string[]
   coverUrl?: string
+  difficulty?: number  // 1–5
 }

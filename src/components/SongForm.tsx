@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { X, Star } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Song, SongFormData, DrumPattern, TimeSignature } from '@/types/song'
 import { parseDurationInput, formatDurationSec } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B',
   'Am', 'Bm', 'Cm', 'Dm', 'Em', 'Fm', 'Gm']
@@ -36,6 +37,7 @@ export function SongForm({ initial, onSave, onCancel }: SongFormProps) {
     notes: initial?.notes ?? '',
     tags: initial?.tags ?? [],
     coverUrl: initial?.coverUrl,
+    difficulty: initial?.difficulty,
   })
   const [durationInput, setDurationInput] = useState(
     initial?.durationSec ? formatDurationSec(initial.durationSec) : ''
@@ -225,6 +227,39 @@ export function SongForm({ initial, onSave, onCancel }: SongFormProps) {
             if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput) }
           }}
         />
+      </div>
+
+      {/* Difficulty */}
+      <div className="space-y-1.5">
+        <Label>{t('song.difficulty')}</Label>
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => set('difficulty', form.difficulty === n ? undefined : n)}
+              className="p-0.5 transition-transform hover:scale-110"
+            >
+              <Star
+                className={cn(
+                  'h-6 w-6 transition-colors',
+                  (form.difficulty ?? 0) >= n
+                    ? 'text-amber-400 fill-amber-400'
+                    : 'text-zinc-700',
+                )}
+              />
+            </button>
+          ))}
+          {form.difficulty && (
+            <button
+              type="button"
+              onClick={() => set('difficulty', undefined)}
+              className="ml-1 text-xs text-zinc-600 hover:text-zinc-400"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-2">

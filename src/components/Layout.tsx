@@ -1,10 +1,11 @@
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Guitar, Globe, User, Cloud, CloudOff, Loader2, LogOut, RefreshCw, Zap, ZapOff, HelpCircle } from 'lucide-react'
+import { Guitar, Globe, User, Cloud, CloudOff, Loader2, LogOut, RefreshCw, Zap, ZapOff, HelpCircle, Mic2, Flame } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { AuthDialog } from '@/components/AuthDialog'
 import { HelpDialog } from '@/components/HelpDialog'
+import { TunerDialog } from '@/components/TunerDialog'
 import { useAuthStore } from '@/store/authStore'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
@@ -20,9 +21,12 @@ export function Layout() {
   const { loadSongs } = useSongStore()
   const { loadSets } = useSetStore()
 
+  const streak = useSongStore((s) => s.streak)
+
   const [showAuth, setShowAuth] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showTuner, setShowTuner] = useState(false)
 
   const reload = async () => { await Promise.all([loadSongs(), loadSets()]) }
 
@@ -63,6 +67,19 @@ export function Layout() {
             </Link>
 
             <div className="flex items-center gap-1">
+              {/* Streak */}
+              {streak > 0 && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg text-amber-400" title={t('streak.label', { n: streak })}>
+                  <Flame className="h-4 w-4" />
+                  <span className="text-xs font-bold">{streak}</span>
+                </div>
+              )}
+
+              {/* Tuner */}
+              <Button variant="ghost" size="icon-sm" onClick={() => setShowTuner(true)} title={t('tuner.title')}>
+                <Mic2 className="h-4 w-4" />
+              </Button>
+
               {/* Help button */}
               <Button variant="ghost" size="icon-sm" onClick={() => setShowHelp(true)} title={t('help.title')}>
                 <HelpCircle className="h-4 w-4" />
@@ -188,6 +205,7 @@ export function Layout() {
 
       <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
       <HelpDialog open={showHelp} onOpenChange={setShowHelp} />
+      <TunerDialog open={showTuner} onOpenChange={setShowTuner} />
 
       {!isPractice && (
         <footer className="border-t border-zinc-800/60 py-3 px-4">

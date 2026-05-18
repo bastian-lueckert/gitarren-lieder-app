@@ -17,7 +17,7 @@ import type { PracticePlan } from '@/types/practicePlan'
 import { formatTotalDuration } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
-type SortKey = 'title' | 'artist' | 'createdAt' | 'lastPracticed'
+type SortKey = 'title' | 'artist' | 'createdAt' | 'lastPracticed' | 'difficulty'
 type Tab = 'songs' | 'sets' | 'plan'
 
 function planDateLabel(dateStr: string, t: ReturnType<typeof useTranslation>['t']): string {
@@ -72,6 +72,7 @@ export function HomePage() {
           const db2 = b.lastPracticed ? new Date(b.lastPracticed).getTime() : 0
           return db2 - da
         }
+        if (sort === 'difficulty') return (b.difficulty ?? 0) - (a.difficulty ?? 0)
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       })
   }, [songs, search, sort])
@@ -287,6 +288,7 @@ export function HomePage() {
               <option value="title">{t('songs.sortTitle')}</option>
               <option value="artist">{t('songs.sortArtist')}</option>
               <option value="lastPracticed">{t('songs.sortPracticed')}</option>
+              <option value="difficulty">{t('songs.sortDifficulty')}</option>
             </select>
           </div>
 

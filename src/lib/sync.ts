@@ -13,7 +13,8 @@ interface SongRow {
   drum_pattern: string | null; musical_key: string | null; capo: number
   notes: string | null; tags: string[]; last_practiced: string | null
   practice_count: number; mbid: string | null; cover_url: string | null
-  share_token: string | null; created_at: string; updated_at: string
+  share_token: string | null; difficulty: number | null
+  created_at: string; updated_at: string
 }
 
 interface SetRow {
@@ -39,6 +40,7 @@ function songToRow(s: Song, userId: string): SongRow {
     last_practiced: s.lastPracticed?.toISOString() ?? null,
     practice_count: s.practiceCount ?? 0, mbid: s.mbid ?? null,
     cover_url: s.coverUrl ?? null, share_token: s.shareToken ?? null,
+    difficulty: s.difficulty ?? null,
     created_at: s.createdAt.toISOString(), updated_at: s.updatedAt.toISOString(),
   }
 }
@@ -55,6 +57,7 @@ function rowToSong(r: SongRow): Song {
     lastPracticed: r.last_practiced ? new Date(r.last_practiced) : undefined,
     practiceCount: r.practice_count, mbid: r.mbid ?? undefined,
     coverUrl: r.cover_url ?? undefined, shareToken: r.share_token ?? undefined,
+    difficulty: r.difficulty ?? undefined,
     createdAt: new Date(r.created_at), updatedAt: new Date(r.updated_at),
   }
 }

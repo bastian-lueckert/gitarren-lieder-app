@@ -21,6 +21,7 @@ export const de = {
       sortArtist: 'Interpret',
       sortDate: 'Zuletzt hinzugefügt',
       sortPracticed: 'Zuletzt geübt',
+      sortDifficulty: 'Schwierigkeit',
       showAll: 'Alle {{n}} Lieder anzeigen',
       showLess: 'Weniger anzeigen',
       select: 'Auswählen',
@@ -51,6 +52,7 @@ export const de = {
       loadChords: 'Akkorde automatisch laden',
       reloadChords: 'Akkorde neu laden',
       chordsNotFound: 'Keine Akkorde gefunden – bitte manuell einfügen.',
+      difficulty: 'Schwierigkeit',
     },
     sets: {
       title: 'Sets',
@@ -211,6 +213,18 @@ export const de = {
       yesterday: 'Gestern',
       daysAgo: 'vor {{n}} Tagen',
       planSize: 'Lieder pro Plan',
+    },
+    tuner: {
+      title: 'Stimmgerät',
+      start: 'Mikrofon starten',
+      stop: 'Stoppen',
+      listening: 'Höre zu …',
+      inTune: 'Gestimmt!',
+      micError: 'Mikrofon konnte nicht gestartet werden.',
+      standardTuning: 'Standard-Stimmung (E A D G B E)',
+    },
+    streak: {
+      label: '{{n}} Tage in Folge geübt',
     },
     help: {
       title: 'Hilfe & Funktionen',

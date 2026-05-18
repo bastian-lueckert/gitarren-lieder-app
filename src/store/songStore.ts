@@ -4,6 +4,7 @@ import { db } from '@/db/database'
 import type { Song, SongFormData } from '@/types/song'
 import { pushSong, deleteSongCloud, deleteSongsCloud } from '@/lib/sync'
 import { useAuthStore } from '@/store/authStore'
+import { recordPracticeToday, getStreak } from '@/lib/streak'
 
 function getUserId() {
   return useAuthStore.getState().user?.id
@@ -16,6 +17,7 @@ function autoSync() {
 interface SongStore {
   songs: Song[]
   loading: boolean
+  streak: number
   loadSongs: () => Promise<void>
   addSong: (data: SongFormData) => Promise<Song>
   updateSong: (id: string, data: Partial<SongFormData>) => Promise<void>
@@ -29,6 +31,7 @@ interface SongStore {
 export const useSongStore = create<SongStore>((set, get) => ({
   songs: [],
   loading: false,
+  streak: getStreak(),
 
   loadSongs: async () => {
     set({ loading: true })
@@ -84,6 +87,8 @@ export const useSongStore = create<SongStore>((set, get) => ({
     const updated = get().songs.find((s) => s.id === id)
     const userId = getUserId()
     if (updated && userId) pushSong(updated, userId).catch(() => {})
+    recordPracticeToday()
+    set({ streak: getStreak() })
     autoSync()
   },
 

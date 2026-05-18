@@ -21,6 +21,7 @@ export const en = {
       sortArtist: 'Artist',
       sortDate: 'Recently added',
       sortPracticed: 'Recently practiced',
+      sortDifficulty: 'Difficulty',
       showAll: 'Show all {{n}} songs',
       showLess: 'Show less',
       select: 'Select',
@@ -51,6 +52,7 @@ export const en = {
       loadChords: 'Auto-load chords',
       reloadChords: 'Reload chords',
       chordsNotFound: 'No chords found – please enter them manually.',
+      difficulty: 'Difficulty',
     },
     sets: {
       title: 'Sets',
@@ -211,6 +213,18 @@ export const en = {
       yesterday: 'Yesterday',
       daysAgo: '{{n}} days ago',
       planSize: 'Songs per plan',
+    },
+    tuner: {
+      title: 'Tuner',
+      start: 'Start microphone',
+      stop: 'Stop',
+      listening: 'Listening …',
+      inTune: 'In tune!',
+      micError: 'Could not access microphone.',
+      standardTuning: 'Standard tuning (E A D G B E)',
+    },
+    streak: {
+      label: '{{n}} days practiced in a row',
     },
     help: {
       title: 'Help & Features',

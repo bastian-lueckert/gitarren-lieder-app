@@ -90,6 +90,16 @@ export function SongCard({ song, onClick, selectionMode, selected, onSelect }: S
           {song.musicalKey && (
             <span className="text-xs text-zinc-500">{song.musicalKey}</span>
           )}
+          {song.difficulty != null && (
+            <span className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <span
+                  key={n}
+                  className={cn('w-1.5 h-1.5 rounded-full', n <= song.difficulty! ? 'bg-amber-400' : 'bg-zinc-700')}
+                />
+              ))}
+            </span>
+          )}
           {song.tags?.map((tag) => (
             <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-500">{tag}</span>
           ))}
