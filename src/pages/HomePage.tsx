@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, Download, Search, Guitar, ListMusic, ChevronRight, Clock, CalendarDays, CheckCircle2, Dices, ChevronDown, ChevronUp, Trash2, X } from 'lucide-react'
+import { Plus, Download, Search, Guitar, ListMusic, ChevronRight, Clock, CalendarDays, CheckCircle2, Dices, ChevronDown, ChevronUp, Trash2, X, TrendingUp } from 'lucide-react'
 import { YouTubeIcon } from '@/components/YouTubeIcon'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
@@ -11,6 +11,7 @@ import { SongCard } from '@/components/SongCard'
 import { AddSongDialog } from '@/components/ImportDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { fetchUGPopular, type UGTab } from '@/lib/ugPopular'
 import type { SongFormData } from '@/types/song'
 import type { PracticePlan } from '@/types/practicePlan'
 import { formatTotalDuration } from '@/lib/utils'
@@ -44,6 +45,11 @@ export function HomePage() {
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [chartsPreview, setChartsPreview] = useState<UGTab[]>([])
+
+  useEffect(() => {
+    fetchUGPopular().then((data) => setChartsPreview(data.slice(0, 5)))
+  }, [])
 
   const COLLAPSE_LIMIT = 7
   const dailySong = getSongOfTheDay()
@@ -210,6 +216,56 @@ export function HomePage() {
               </a>
             </div>
           </div>
+
+          {/* UG Charts Preview */}
+          {chartsPreview.length > 0 && (
+            <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-amber-400" />
+                  <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">{t('charts.title')}</span>
+                </div>
+                <button
+                  onClick={() => navigate('/charts')}
+                  className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1"
+                >
+                  {t('charts.viewAll')}
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="space-y-1">
+                {chartsPreview.map((tab, i) => {
+                  const inLibrary = songs.some(
+                    (s) =>
+                      s.title.toLowerCase() === tab.song.toLowerCase() &&
+                      s.artist.toLowerCase() === tab.artist.toLowerCase(),
+                  )
+                  return (
+                    <div key={tab.id} className="flex items-center gap-2.5 py-1.5">
+                      <span className={cn('w-5 text-xs font-mono font-bold shrink-0 text-center', i < 3 ? 'text-amber-400' : 'text-zinc-600')}>
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-zinc-200 truncate block">{tab.song}</span>
+                        <span className="text-xs text-zinc-500 truncate block">{tab.artist}</span>
+                      </div>
+                      {inLibrary ? (
+                        <span className="text-xs text-amber-400 font-medium shrink-0">{t('charts.inLibrary')}</span>
+                      ) : (
+                        <button
+                          onClick={() => { setAddDialogInitial({ artist: tab.artist, title: tab.song }); setShowAddDialog(true) }}
+                          className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors"
+                        >
+                          <Download className="h-3 w-3" />
+                          {t('charts.import')}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Search + Sort */}
           <div className="flex gap-3">

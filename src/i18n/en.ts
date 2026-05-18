@@ -211,6 +211,16 @@ export const en = {
       yesterday: 'Yesterday',
       daysAgo: '{{n}} days ago',
     },
+    charts: {
+      title: 'Popular Chord Songs',
+      subtitle: 'Most-played chord tabs on Ultimate Guitar',
+      import: 'Import',
+      inLibrary: 'In library',
+      source: 'Source: Ultimate Guitar',
+      error: 'Could not load charts.',
+      openUG: 'Open on Ultimate Guitar',
+      viewAll: 'View all',
+    },
     footer: {
       releaseNotes: 'Release notes',
     },

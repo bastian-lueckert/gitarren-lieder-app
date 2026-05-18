@@ -211,6 +211,16 @@ export const de = {
       yesterday: 'Gestern',
       daysAgo: 'vor {{n}} Tagen',
     },
+    charts: {
+      title: 'Beliebte Akkord-Songs',
+      subtitle: 'Die meistgespielten Chord-Tabs auf Ultimate Guitar',
+      import: 'Importieren',
+      inLibrary: 'In Bibliothek',
+      source: 'Quelle: Ultimate Guitar',
+      error: 'Charts konnten nicht geladen werden.',
+      openUG: 'Auf Ultimate Guitar öffnen',
+      viewAll: 'Alle anzeigen',
+    },
     footer: {
       releaseNotes: 'Versionshinweise',
     },

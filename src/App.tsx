@@ -9,6 +9,7 @@ import { SetDetailPage } from '@/pages/SetDetailPage'
 import { PracticePlanPage } from '@/pages/PracticePlanPage'
 import { SharedSongPage } from '@/pages/SharedSongPage'
 import { SharedSetPage } from '@/pages/SharedSetPage'
+import { ChartsPage } from '@/pages/ChartsPage'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
 import { useAuthStore } from '@/store/authStore'
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/sets" element={<SetsPage />} />
           <Route path="/sets/:id" element={<SetDetailPage />} />
           <Route path="/practice-plan/:id" element={<PracticePlanPage />} />
+          <Route path="/charts" element={<ChartsPage />} />
         </Route>
         {/* Public share pages — standalone, no Layout */}
         <Route path="/share/song/:token" element={<SharedSongPage />} />
