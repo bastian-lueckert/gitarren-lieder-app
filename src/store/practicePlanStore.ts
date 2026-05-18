@@ -4,7 +4,7 @@ import { db } from '@/db/database'
 import type { PracticePlan } from '@/types/practicePlan'
 import type { Song } from '@/types/song'
 
-const MAX_PLAN_SIZE = 10
+const DEFAULT_PLAN_SIZE = 10
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10)
@@ -20,7 +20,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 // Pick songs prioritising those least recently included in any plan
-function pickSongs(songs: Song[], plans: PracticePlan[]): string[] {
+function pickSongs(songs: Song[], plans: PracticePlan[], size: number): string[] {
   if (songs.length === 0) return []
 
   const lastPlanned = new Map<string, number>()
@@ -37,12 +37,14 @@ function pickSongs(songs: Song[], plans: PracticePlan[]): string[] {
     return ta - tb
   })
 
-  const pool = sorted.slice(0, Math.min(MAX_PLAN_SIZE, songs.length))
+  const pool = sorted.slice(0, Math.min(size, songs.length))
   return shuffle(pool.map((s) => s.id))
 }
 
 interface PracticePlanStore {
   plans: PracticePlan[]
+  planSize: number
+  setPlanSize: (n: number) => void
   loadPlans: () => Promise<void>
   todaysPlan: () => PracticePlan | undefined
   generatePlan: (songs: Song[]) => Promise<PracticePlan>
@@ -52,6 +54,13 @@ interface PracticePlanStore {
 
 export const usePracticePlanStore = create<PracticePlanStore>((set, get) => ({
   plans: [],
+  planSize: parseInt(localStorage.getItem('planSize') ?? String(DEFAULT_PLAN_SIZE), 10) || DEFAULT_PLAN_SIZE,
+
+  setPlanSize: (n) => {
+    const clamped = Math.max(1, Math.min(50, n))
+    localStorage.setItem('planSize', String(clamped))
+    set({ planSize: clamped })
+  },
 
   loadPlans: async () => {
     const plans = await db.plans.orderBy('date').reverse().toArray()
@@ -68,7 +77,7 @@ export const usePracticePlanStore = create<PracticePlanStore>((set, get) => ({
     const existing = get().plans.find((p) => p.date === today)
     if (existing) return existing
 
-    const songIds = pickSongs(songs, get().plans)
+    const songIds = pickSongs(songs, get().plans, get().planSize)
     const now = new Date()
     const plan: PracticePlan = {
       id: uuidv4(),

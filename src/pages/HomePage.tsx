@@ -34,7 +34,7 @@ export function HomePage() {
   const navigate = useNavigate()
   const { songs, addSong, deleteSongs } = useSongStore()
   const { sets } = useSetStore()
-  const { plans, todaysPlan, generatePlan } = usePracticePlanStore()
+  const { plans, todaysPlan, generatePlan, planSize, setPlanSize } = usePracticePlanStore()
 
   const [tab, setTab] = useState<Tab>('songs')
   const [search, setSearch] = useState('')
@@ -420,6 +420,8 @@ export function HomePage() {
           plans={plans}
           songs={songs}
           todaysPlan={todaysPlan()}
+          planSize={planSize}
+          onPlanSizeChange={setPlanSize}
           onGenerate={() => generatePlan(songs)}
           onOpen={(id) => navigate(`/practice-plan/${id}`)}
         />
@@ -440,11 +442,13 @@ interface PlanTabProps {
   plans: PracticePlan[]
   songs: { id: string }[]
   todaysPlan: PracticePlan | undefined
+  planSize: number
+  onPlanSizeChange: (n: number) => void
   onGenerate: () => Promise<PracticePlan>
   onOpen: (id: string) => void
 }
 
-function PlanTab({ plans, songs, todaysPlan, onGenerate, onOpen }: PlanTabProps) {
+function PlanTab({ plans, songs, todaysPlan, planSize, onPlanSizeChange, onGenerate, onOpen }: PlanTabProps) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
 
@@ -479,6 +483,24 @@ function PlanTab({ plans, songs, todaysPlan, onGenerate, onOpen }: PlanTabProps)
             </span>
           )}
         </div>
+
+        {/* Plan size stepper — only before a plan is created */}
+        {!todaysPlan && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-zinc-400">{t('plan.planSize')}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onPlanSizeChange(planSize - 1)}
+                className="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold flex items-center justify-center transition-colors"
+              >−</button>
+              <span className="text-sm font-mono font-bold text-amber-400 w-6 text-center">{planSize}</span>
+              <button
+                onClick={() => onPlanSizeChange(planSize + 1)}
+                className="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold flex items-center justify-center transition-colors"
+              >+</button>
+            </div>
+          </div>
+        )}
 
         {todaysPlan ? (
           <>

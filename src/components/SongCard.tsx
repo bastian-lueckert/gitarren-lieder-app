@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Music, Clock, Gauge, Timer, ChevronRight, Check } from 'lucide-react'
+import { Music, Timer, ChevronRight, Check } from 'lucide-react'
 import { YouTubeIcon } from '@/components/YouTubeIcon'
 import type { Song } from '@/types/song'
-import { formatDate, formatDurationSec } from '@/lib/utils'
+import { formatDurationSec } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
 interface SongCardProps {
@@ -28,7 +28,7 @@ function CoverArt({ url }: { url: string }) {
 }
 
 export function SongCard({ song, onClick, selectionMode, selected, onSelect }: SongCardProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`
 
   function handleClick() {
@@ -87,35 +87,14 @@ export function SongCard({ song, onClick, selectionMode, selected, onSelect }: S
               {formatDurationSec(song.durationSec)}
             </span>
           )}
-          {song.bpm && (
-            <span className="flex items-center gap-1 text-xs text-zinc-500">
-              <Gauge className="h-3 w-3" />
-              {song.bpm} BPM
-            </span>
-          )}
           {song.musicalKey && (
             <span className="text-xs text-zinc-500">{song.musicalKey}</span>
           )}
-          {song.lastPracticed && (
-            <span className="flex items-center gap-1 text-xs text-zinc-600">
-              <Clock className="h-3 w-3" />
-              {formatDate(song.lastPracticed, i18n.language)}
-            </span>
-          )}
           {song.tags?.map((tag) => (
-            <span key={tag} className={cn(
-              'text-xs px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-500',
-            )}>{tag}</span>
+            <span key={tag} className="text-xs px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-500">{tag}</span>
           ))}
         </div>
       </div>
-
-      {!selectionMode && song.practiceCount != null && song.practiceCount > 0 && (
-        <div className="flex-shrink-0 text-center">
-          <p className="text-lg font-bold text-amber-500">{song.practiceCount}</p>
-          <p className="text-xs text-zinc-600">{t('song.practiceCount')}</p>
-        </div>
-      )}
 
       {!selectionMode && (
         <a

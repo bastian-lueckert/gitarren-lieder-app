@@ -210,6 +210,7 @@ export const de = {
       delete: 'Plan löschen',
       yesterday: 'Gestern',
       daysAgo: 'vor {{n}} Tagen',
+      planSize: 'Lieder pro Plan',
     },
     help: {
       title: 'Hilfe & Funktionen',
