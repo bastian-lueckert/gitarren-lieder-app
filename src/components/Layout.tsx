@@ -1,9 +1,10 @@
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Guitar, Globe, User, Cloud, CloudOff, Loader2, LogOut, RefreshCw, Zap, ZapOff } from 'lucide-react'
+import { Guitar, Globe, User, Cloud, CloudOff, Loader2, LogOut, RefreshCw, Zap, ZapOff, HelpCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { AuthDialog } from '@/components/AuthDialog'
+import { HelpDialog } from '@/components/HelpDialog'
 import { useAuthStore } from '@/store/authStore'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
@@ -21,6 +22,7 @@ export function Layout() {
 
   const [showAuth, setShowAuth] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const reload = async () => { await Promise.all([loadSongs(), loadSets()]) }
 
@@ -61,6 +63,11 @@ export function Layout() {
             </Link>
 
             <div className="flex items-center gap-1">
+              {/* Help button */}
+              <Button variant="ghost" size="icon-sm" onClick={() => setShowHelp(true)} title={t('help.title')}>
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+
               {/* Language toggle */}
               <Button variant="ghost" size="icon-sm" onClick={toggleLang} title="Switch language">
                 <Globe className="h-4 w-4" />
@@ -180,6 +187,7 @@ export function Layout() {
       </main>
 
       <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
+      <HelpDialog open={showHelp} onOpenChange={setShowHelp} />
 
       {!isPractice && (
         <footer className="border-t border-zinc-800/60 py-3 px-4">

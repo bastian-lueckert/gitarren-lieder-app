@@ -211,6 +211,50 @@ export const de = {
       yesterday: 'Gestern',
       daysAgo: 'vor {{n}} Tagen',
     },
+    help: {
+      title: 'Hilfe & Funktionen',
+      intro: 'Hier findest du einen Überblick über alle Funktionen der App.',
+      addSong: {
+        title: 'Lieder hinzufügen',
+        desc: 'Tippe auf „Neues Lied" um ein Lied manuell anzulegen. Du kannst Liedtext, Akkorde, Tempo (BPM), Tonart, Kapodaster und eigene Notizen speichern.',
+      },
+      import: {
+        title: 'Lied importieren',
+        desc: 'Über „Importieren" suchst du nach Interpret und Titel. Liedtext und BPM werden automatisch geladen – Akkorde kannst du danach auf Ultimate Guitar ergänzen.',
+      },
+      charts: {
+        title: 'Beliebte Songs (Charts)',
+        desc: 'Die Charts-Seite zeigt die 50 beliebtesten Akkord-Songs. Mit einem Klick auf „Importieren" wird der Song direkt in deine Bibliothek übernommen.',
+      },
+      songOfDay: {
+        title: 'Song des Tages',
+        desc: 'Jeden Tag wird ein neuer Song vorgeschlagen. Du kannst ihn direkt importieren oder dir auf YouTube anhören.',
+      },
+      practice: {
+        title: 'Üben mit Metronom',
+        desc: 'Öffne ein Lied und tippe auf „Üben". Das integrierte Metronom spielt im richtigen Tempo mit Drum-Pattern. Per Tap-Tempo lässt sich das BPM intuitiv einstellen.',
+      },
+      fullscreen: {
+        title: 'Vollbild-Modus',
+        desc: 'Im Üben-Modus kannst du auf Vollbild wechseln – der Text füllt den ganzen Bildschirm. Das Metronom läuft weiter und ist über den HUD-Button bedienbar.',
+      },
+      scroll: {
+        title: 'Auto-Scroll',
+        desc: 'Starte den Auto-Scroll, damit der Liedtext automatisch mit der Lesegeschwindigkeit scrollt – ideal beim Spielen ohne Hand frei.',
+      },
+      sets: {
+        title: 'Sets (Setlists)',
+        desc: 'Fasse mehrere Lieder zu einem Set zusammen, z. B. für ein Konzert oder eine Session. Sets lassen sich als öffentlicher Link teilen.',
+      },
+      plan: {
+        title: 'Übungsplan',
+        desc: 'Der Übungsplan erstellt täglich eine zufällige Auswahl aus deiner Bibliothek. Markiere Lieder als „Geübt", um deinen Fortschritt zu verfolgen.',
+      },
+      sync: {
+        title: 'Cloud-Synchronisation',
+        desc: 'Melde dich mit einem Konto an, um deine Lieder auf mehreren Geräten zu synchronisieren. Der Auto-Sync überträgt Änderungen automatisch nach wenigen Sekunden.',
+      },
+    },
     charts: {
       title: 'Beliebte Akkord-Songs',
       subtitle: 'Die meistgespielten Chord-Tabs auf Ultimate Guitar',

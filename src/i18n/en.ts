@@ -211,6 +211,50 @@ export const en = {
       yesterday: 'Yesterday',
       daysAgo: '{{n}} days ago',
     },
+    help: {
+      title: 'Help & Features',
+      intro: 'Here is an overview of everything the app can do.',
+      addSong: {
+        title: 'Add songs',
+        desc: 'Tap "New Song" to create a song manually. You can store lyrics, chords, tempo (BPM), key, capo, and personal notes.',
+      },
+      import: {
+        title: 'Import a song',
+        desc: 'Use "Import" to search by artist and title. Lyrics and BPM are loaded automatically — you can add chords afterwards via Ultimate Guitar.',
+      },
+      charts: {
+        title: 'Popular songs (Charts)',
+        desc: 'The Charts page shows the 50 most popular chord songs. One tap on "Import" adds the song directly to your library.',
+      },
+      songOfDay: {
+        title: 'Song of the Day',
+        desc: 'A new song is suggested every day. You can import it instantly or listen on YouTube.',
+      },
+      practice: {
+        title: 'Practice with metronome',
+        desc: 'Open a song and tap "Practice". The built-in metronome plays along at the correct tempo with a drum pattern. Use Tap Tempo to set the BPM intuitively.',
+      },
+      fullscreen: {
+        title: 'Fullscreen mode',
+        desc: 'In practice mode you can switch to fullscreen — the text fills the entire screen. The metronome keeps running and can be controlled from the HUD.',
+      },
+      scroll: {
+        title: 'Auto-scroll',
+        desc: 'Start auto-scroll so the lyrics scroll automatically at reading speed — perfect when both hands are on the guitar.',
+      },
+      sets: {
+        title: 'Sets (Setlists)',
+        desc: 'Group songs into a set, e.g. for a concert or session. Sets can be shared as a public link.',
+      },
+      plan: {
+        title: 'Practice plan',
+        desc: 'The practice plan creates a random daily selection from your library. Mark songs as "Done" to track your progress.',
+      },
+      sync: {
+        title: 'Cloud sync',
+        desc: 'Sign in with an account to sync your songs across devices. Auto-sync transfers changes automatically after a few seconds.',
+      },
+    },
     charts: {
       title: 'Popular Chord Songs',
       subtitle: 'Most-played chord tabs on Ultimate Guitar',
