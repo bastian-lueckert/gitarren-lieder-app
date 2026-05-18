@@ -105,6 +105,8 @@ export const de = {
       scrollStop: 'Stoppen',
       scrollSpeed: 'Lesegeschwindigkeit',
       metronome: 'Metronom',
+      fullscreen: 'Vollbild',
+      exitFullscreen: 'Vollbild beenden',
     },
     form: {
       save: 'Speichern',

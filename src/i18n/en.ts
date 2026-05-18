@@ -105,6 +105,8 @@ export const en = {
       scrollStop: 'Stop scroll',
       scrollSpeed: 'Speed',
       metronome: 'Metronome',
+      fullscreen: 'Full screen',
+      exitFullscreen: 'Exit full screen',
     },
     form: {
       save: 'Save',
