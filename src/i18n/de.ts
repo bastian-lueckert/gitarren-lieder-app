@@ -211,6 +211,9 @@ export const de = {
       yesterday: 'Gestern',
       daysAgo: 'vor {{n}} Tagen',
     },
+    footer: {
+      releaseNotes: 'Versionshinweise',
+    },
     keys: {
       C: 'C Dur', 'C#': 'C# Dur', D: 'D Dur', 'D#': 'D# Dur', E: 'E Dur',
       F: 'F Dur', 'F#': 'F# Dur', G: 'G Dur', 'G#': 'G# Dur', A: 'A Dur',

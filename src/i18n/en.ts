@@ -211,6 +211,9 @@ export const en = {
       yesterday: 'Yesterday',
       daysAgo: '{{n}} days ago',
     },
+    footer: {
+      releaseNotes: 'Release notes',
+    },
     keys: {
       C: 'C Major', 'C#': 'C# Major', D: 'D Major', 'D#': 'D# Major', E: 'E Major',
       F: 'F Major', 'F#': 'F# Major', G: 'G Major', 'G#': 'G# Major', A: 'A Major',

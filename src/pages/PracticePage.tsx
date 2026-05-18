@@ -54,8 +54,6 @@ export function PracticePage() {
 
   // Fullscreen state
   const [fullscreen, setFullscreen] = useState(false)
-  const [hudVisible, setHudVisible] = useState(true)
-  const hudTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fontRem = FONT_SIZES[fontIdx]
 
@@ -121,32 +119,13 @@ export function PracticePage() {
     return () => document.removeEventListener('fullscreenchange', onFsChange)
   }, [])
 
-  // Cleanup HUD timer on unmount
-  useEffect(() => {
-    return () => { if (hudTimerRef.current) clearTimeout(hudTimerRef.current) }
-  }, [])
-
-  function scheduleHudHide() {
-    if (hudTimerRef.current) clearTimeout(hudTimerRef.current)
-    hudTimerRef.current = setTimeout(() => setHudVisible(false), 3000)
-  }
-
-  function showHud() {
-    setHudVisible(true)
-    scheduleHudHide()
-  }
-
   function enterFullscreen() {
     setFullscreen(true)
-    setHudVisible(true)
-    scheduleHudHide()
     document.documentElement.requestFullscreen?.().catch(() => {})
   }
 
   function exitFullscreen() {
     setFullscreen(false)
-    setHudVisible(true)
-    if (hudTimerRef.current) clearTimeout(hudTimerRef.current)
     if (document.fullscreenElement) document.exitFullscreen?.()
   }
 
@@ -189,90 +168,88 @@ export function PracticePage() {
 
     return (
       <div
-        className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col select-none"
+        className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col"
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        {/* Top HUD */}
-        <div className={cn(
-          'shrink-0 flex items-center justify-between gap-3 px-4 py-3',
-          'bg-gradient-to-b from-zinc-950 via-zinc-950/90 to-transparent',
-          'transition-opacity duration-300',
-          hudVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
-        )}>
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={exitFullscreen}
-              className="shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors"
-            >
-              <Minimize2 className="h-5 w-5" />
-            </button>
-            <div className="min-w-0">
-              <p className="font-semibold text-zinc-100 text-sm leading-tight truncate">{song.title}</p>
-              <p className="text-xs text-zinc-500 truncate">{song.artist}</p>
-            </div>
-          </div>
-
-          {/* Tab switcher */}
-          <div className="flex gap-1 p-0.5 rounded-lg bg-zinc-800/80 shrink-0">
-            {availableTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  'px-3 py-1 rounded-md text-xs font-medium transition-colors',
-                  activeTab === tab
-                    ? 'bg-amber-500 text-zinc-950'
-                    : 'text-zinc-400 hover:text-zinc-200',
-                )}
-              >
-                {tab === 'chords' ? t('practice.chordsTab')
-                  : tab === 'lyrics' ? t('practice.lyricsTab')
-                  : t('practice.notesTab')}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Scrollable content — tap to show HUD */}
+        {/* Scrollable content — fills the entire screen, HUD floats above it */}
         <div
           ref={fsScrollRef}
-          className="flex-1 min-h-0 overflow-y-auto select-text"
-          onClick={showHud}
+          className="absolute inset-0 overflow-y-auto select-text"
         >
+          {/* Top padding so content starts below the HUD bar */}
+          <div className="h-16" />
           {activeTab === 'chords' && (
             song.chords
-              ? <ChordSheet content={song.chords} fontSize={fontRem} lineHeight={LINE_HEIGHT} className="p-5 pb-28" />
+              ? <ChordSheet content={song.chords} fontSize={fontRem} lineHeight={LINE_HEIGHT} className="px-5 py-2" />
               : <p className="text-center text-zinc-600 py-12 text-sm">{t('practice.chordsTab')} —</p>
           )}
           {activeTab === 'lyrics' && (
             song.lyrics
-              ? <pre className="whitespace-pre-wrap text-zinc-200 p-5 pb-28 leading-relaxed select-text"
+              ? <pre className="whitespace-pre-wrap text-zinc-200 px-5 py-2 leading-relaxed select-text"
                   style={{ fontSize: `${fontRem}rem`, lineHeight: LINE_HEIGHT }}>
                   {song.lyrics}
                 </pre>
               : <p className="text-center text-zinc-600 py-12 text-sm">{t('practice.lyricsTab')} —</p>
           )}
           {activeTab === 'notes' && song.notes && (
-            <pre className="whitespace-pre-wrap text-zinc-300 p-5 pb-28 leading-relaxed select-text"
+            <pre className="whitespace-pre-wrap text-zinc-300 px-5 py-2 leading-relaxed select-text"
               style={{ fontSize: `${fontRem}rem`, lineHeight: LINE_HEIGHT }}>
               {song.notes}
             </pre>
           )}
+          {/* Bottom padding so content is not hidden behind bottom HUD */}
+          <div className="h-36" />
         </div>
 
-        {/* Bottom HUD */}
-        <div className={cn(
-          'absolute bottom-0 left-0 right-0',
-          'bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent',
-          'transition-opacity duration-300',
-          hudVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
-        )}
-          style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom, 16px))' }}
+        {/* Top HUD — floats above content, gradient fades into content */}
+        {/* pointer-events-none on the gradient so scroll passes through; buttons get pointer-events-auto */}
+        <div className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+          style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-b from-zinc-950/95 via-zinc-950/70 to-transparent pb-8">
+            <div className="flex items-center gap-3 min-w-0 pointer-events-auto">
+              <button
+                onClick={exitFullscreen}
+                className="shrink-0 p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 transition-colors"
+              >
+                <Minimize2 className="h-5 w-5" />
+              </button>
+              <div className="min-w-0">
+                <p className="font-semibold text-zinc-100 text-sm leading-tight truncate">{song.title}</p>
+                <p className="text-xs text-zinc-500 truncate">{song.artist}</p>
+              </div>
+            </div>
+
+            {/* Tab switcher */}
+            <div className="flex gap-1 p-0.5 rounded-lg bg-zinc-800/70 backdrop-blur-sm shrink-0 pointer-events-auto">
+              {availableTabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    'px-3 py-1 rounded-md text-xs font-medium transition-colors',
+                    activeTab === tab
+                      ? 'bg-amber-500 text-zinc-950'
+                      : 'text-zinc-400 hover:text-zinc-200',
+                  )}
+                >
+                  {tab === 'chords' ? t('practice.chordsTab')
+                    : tab === 'lyrics' ? t('practice.lyricsTab')
+                    : t('practice.notesTab')}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom HUD — floats above content */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
+          style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom, 8px))' }}
         >
-          <div className="px-4 pt-8 pb-2 space-y-3">
+          <div className="bg-gradient-to-t from-zinc-950/95 via-zinc-950/70 to-transparent pt-10 px-4 pb-3 space-y-3">
             {/* Speed slider when autoscroll active */}
             {autoScroll && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 pointer-events-auto">
                 <span className="text-xs text-zinc-500 shrink-0 w-24">{t('practice.scrollSpeed')}</span>
                 <Slider
                   min={0.2} max={4} step={0.1}
@@ -284,9 +261,9 @@ export function PracticePage() {
               </div>
             )}
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pointer-events-auto">
               {/* Font size */}
-              <div className="flex items-center gap-1 bg-zinc-800/80 rounded-lg p-1 flex-1">
+              <div className="flex items-center gap-1 bg-zinc-800/80 backdrop-blur-sm rounded-lg p-1 flex-1">
                 <ALargeSmall className="h-3.5 w-3.5 text-zinc-500 ml-1 shrink-0" />
                 {FONT_SIZES.map((_, i) => (
                   <button
@@ -309,7 +286,7 @@ export function PracticePage() {
                   'flex items-center gap-1.5 px-3 h-9 rounded-lg border text-sm font-medium transition-colors shrink-0',
                   autoScroll
                     ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
-                    : 'bg-zinc-800/80 border-zinc-700 text-zinc-400',
+                    : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-zinc-200',
                 )}
               >
                 {autoScroll ? <PauseCircle className="h-4 w-4" /> : <ScrollText className="h-4 w-4" />}

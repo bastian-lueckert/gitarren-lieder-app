@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
 import { cn } from '@/lib/utils'
+import pkg from '../../package.json'
 
 export function Layout() {
   const { t, i18n } = useTranslation()
@@ -179,6 +180,23 @@ export function Layout() {
       </main>
 
       <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
+
+      {!isPractice && (
+        <footer className="border-t border-zinc-800/60 py-3 px-4">
+          <div className="max-w-3xl mx-auto flex items-center justify-center gap-2 text-xs text-zinc-600">
+            <span>v{pkg.version}</span>
+            <span>·</span>
+            <a
+              href="https://github.com/bastian-lueckert/gitarren-lieder-app/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-zinc-400 transition-colors"
+            >
+              {t('footer.releaseNotes')}
+            </a>
+          </div>
+        </footer>
+      )}
     </div>
   )
 }
