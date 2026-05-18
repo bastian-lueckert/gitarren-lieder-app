@@ -15,32 +15,56 @@ interface MetronomeProps {
   drumPattern: DrumPattern
   timeSignature: TimeSignature
   onBpmChange?: (bpm: number) => void
+  // Controlled mode: lift playing state to parent
+  playing?: boolean
+  onPlayingChange?: (v: boolean) => void
 }
 
-export function Metronome({ bpm: initialBpm, drumPattern, timeSignature, onBpmChange }: MetronomeProps) {
+export function Metronome({
+  bpm: initialBpm, drumPattern, timeSignature, onBpmChange,
+  playing: externalPlaying, onPlayingChange,
+}: MetronomeProps) {
   const { t } = useTranslation()
-  const [isPlaying, setIsPlaying] = useState(false)
+  const isControlled = externalPlaying !== undefined
+
+  const [internalPlaying, setInternalPlaying] = useState(false)
+  const isPlaying = isControlled ? externalPlaying! : internalPlaying
+
   const [bpm, setBpm] = useState(initialBpm)
   const [currentBeat, setCurrentBeat] = useState(-1)
   const [drumVol, setDrumVol] = useState(70)
   const [clickVol, setClickVol] = useState(80)
   const beatsPerBar = parseInt(timeSignature.split('/')[0])
-
-  // Tap tempo
   const tapTimes = useRef<number[]>([])
 
-  const handleBeat = useCallback((beat: number) => {
-    setCurrentBeat(beat)
-  }, [])
+  const handleBeat = useCallback((beat: number) => setCurrentBeat(beat), [])
+
+  // Route playing state writes to the right place
+  function setPlaying(v: boolean) {
+    if (isControlled) onPlayingChange?.(v)
+    else setInternalPlaying(v)
+  }
+
+  // When controlled playing changes from outside, start/stop audio
+  useEffect(() => {
+    if (!isControlled) return
+    if (externalPlaying) {
+      startMetronome(bpm, drumPattern, timeSignature, drumVol, clickVol, handleBeat)
+    } else {
+      stopMetronome()
+      setCurrentBeat(-1)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalPlaying, isControlled])
 
   async function toggle() {
     if (isPlaying) {
       stopMetronome()
-      setIsPlaying(false)
       setCurrentBeat(-1)
+      setPlaying(false)
     } else {
       await startMetronome(bpm, drumPattern, timeSignature, drumVol, clickVol, handleBeat)
-      setIsPlaying(true)
+      setPlaying(true)
     }
   }
 
@@ -58,27 +82,19 @@ export function Metronome({ bpm: initialBpm, drumPattern, timeSignature, onBpmCh
       const intervals = taps.slice(1).map((t, i) => t - taps[i])
       const avg = intervals.reduce((a, b) => a + b) / intervals.length
       const newBpm = Math.round(60000 / avg)
-      const clamped = Math.max(20, Math.min(300, newBpm))
-      handleBpmChange(clamped)
+      handleBpmChange(Math.max(20, Math.min(300, newBpm)))
     }
   }
 
-  function handleDrumVol(v: number[]) {
-    setDrumVol(v[0])
-    setDrumVolume(v[0])
-  }
-
-  function handleClickVol(v: number[]) {
-    setClickVol(v[0])
-    setClickVolume(v[0])
-  }
+  function handleDrumVol(v: number[]) { setDrumVol(v[0]); setDrumVolume(v[0]) }
+  function handleClickVol(v: number[]) { setClickVol(v[0]); setClickVolume(v[0]) }
 
   // Restart if pattern/signature changes while playing
   useEffect(() => {
     if (isPlaying) {
       stopMetronome()
       startMetronome(bpm, drumPattern, timeSignature, drumVol, clickVol, handleBeat)
-        .then(() => setIsPlaying(true))
+        .then(() => { if (!isControlled) setInternalPlaying(true) })
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drumPattern, timeSignature])
@@ -122,13 +138,7 @@ export function Metronome({ bpm: initialBpm, drumPattern, timeSignature, onBpmCh
             >+</button>
           </div>
         </div>
-        <Slider
-          min={20}
-          max={300}
-          step={1}
-          value={[bpm]}
-          onValueChange={(v) => handleBpmChange(v[0])}
-        />
+        <Slider min={20} max={300} step={1} value={[bpm]} onValueChange={(v) => handleBpmChange(v[0])} />
       </div>
 
       {/* Controls */}
@@ -147,15 +157,13 @@ export function Metronome({ bpm: initialBpm, drumPattern, timeSignature, onBpmCh
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-zinc-500">
-            <span>{t('practice.drumVolume')}</span>
-            <span>{drumVol}%</span>
+            <span>{t('practice.drumVolume')}</span><span>{drumVol}%</span>
           </div>
           <Slider min={0} max={100} step={1} value={[drumVol]} onValueChange={handleDrumVol} />
         </div>
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs text-zinc-500">
-            <span>{t('practice.clickVolume')}</span>
-            <span>{clickVol}%</span>
+            <span>{t('practice.clickVolume')}</span><span>{clickVol}%</span>
           </div>
           <Slider min={0} max={100} step={1} value={[clickVol]} onValueChange={handleClickVol} />
         </div>
