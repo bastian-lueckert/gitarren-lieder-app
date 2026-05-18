@@ -1,7 +1,7 @@
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Guitar, Globe, User, Cloud, CloudOff, Loader2, LogOut, RefreshCw } from 'lucide-react'
-import { useState } from 'react'
+import { Guitar, Globe, User, Cloud, CloudOff, Loader2, LogOut, RefreshCw, Zap, ZapOff } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { AuthDialog } from '@/components/AuthDialog'
 import { useAuthStore } from '@/store/authStore'
@@ -14,12 +14,19 @@ export function Layout() {
   const location = useLocation()
   const isPractice = location.pathname.includes('/practice')
 
-  const { user, syncing, lastSync, syncError, signOut, sync } = useAuthStore()
+  const { user, syncing, lastSync, syncError, autoSync, autoSyncPending, sync, setAutoSync, setReload } = useAuthStore()
   const { loadSongs } = useSongStore()
   const { loadSets } = useSetStore()
 
   const [showAuth, setShowAuth] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+
+  const reload = async () => { await Promise.all([loadSongs(), loadSets()]) }
+
+  useEffect(() => {
+    setReload(reload)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function toggleLang() {
     const next = i18n.language === 'de' ? 'en' : 'de'
@@ -28,7 +35,7 @@ export function Layout() {
   }
 
   async function handleSync() {
-    await sync(async () => { await Promise.all([loadSongs(), loadSets()]) })
+    await sync(reload)
     setShowUserMenu(false)
   }
 
@@ -37,6 +44,7 @@ export function Layout() {
     setShowUserMenu(false)
   }
 
+  const { signOut } = useAuthStore()
   const shortEmail = user?.email ? user.email.split('@')[0] : ''
 
   return (
@@ -70,23 +78,37 @@ export function Layout() {
                     onClick={() => setShowUserMenu((v) => !v)}
                     className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors text-sm"
                   >
-                    {syncing ? (
-                      <Loader2 className="h-4 w-4 text-amber-500 animate-spin" />
-                    ) : syncError ? (
-                      <CloudOff className="h-4 w-4 text-red-400" />
-                    ) : (
-                      <Cloud className={cn('h-4 w-4', lastSync ? 'text-green-500' : 'text-zinc-500')} />
-                    )}
+                    {/* Cloud icon with status */}
+                    <span className="relative">
+                      {syncing ? (
+                        <Loader2 className="h-4 w-4 text-amber-500 animate-spin" />
+                      ) : syncError ? (
+                        <CloudOff className="h-4 w-4 text-red-400" />
+                      ) : (
+                        <Cloud className={cn('h-4 w-4', lastSync ? 'text-green-500' : 'text-zinc-500')} />
+                      )}
+                      {/* Pending dot */}
+                      {autoSyncPending && !syncing && (
+                        <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                      )}
+                    </span>
                     <span className="text-zinc-300 max-w-[100px] truncate">{shortEmail}</span>
                   </button>
 
                   {showUserMenu && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                      <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl py-1">
+                      <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl py-1">
+                        {/* User info */}
                         <div className="px-3 py-2 border-b border-zinc-800">
                           <p className="text-xs text-zinc-500 truncate">{user.email}</p>
-                          {lastSync && (
+                          {syncing && (
+                            <p className="text-xs text-amber-400 mt-0.5">{t('sync.syncing')}</p>
+                          )}
+                          {autoSyncPending && !syncing && (
+                            <p className="text-xs text-amber-400/70 mt-0.5">{t('sync.autoSyncPending')}</p>
+                          )}
+                          {!syncing && !autoSyncPending && lastSync && (
                             <p className="text-xs text-zinc-600 mt-0.5">
                               {t('sync.synced')}: {lastSync.toLocaleTimeString()}
                             </p>
@@ -95,6 +117,8 @@ export function Layout() {
                             <p className="text-xs text-red-400 mt-0.5">{t('sync.error')}</p>
                           )}
                         </div>
+
+                        {/* Manual sync */}
                         <button
                           onClick={handleSync}
                           disabled={syncing}
@@ -103,13 +127,40 @@ export function Layout() {
                           <RefreshCw className={cn('h-4 w-4', syncing && 'animate-spin')} />
                           {syncing ? t('sync.syncing') : t('sync.syncNow')}
                         </button>
+
+                        {/* Auto-sync toggle */}
                         <button
-                          onClick={handleSignOut}
-                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-zinc-800 transition-colors"
+                          onClick={() => setAutoSync(!autoSync)}
+                          className="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-zinc-800 transition-colors"
                         >
-                          <LogOut className="h-4 w-4" />
-                          {t('auth.signOut')}
+                          <span className="flex items-center gap-2 text-zinc-300">
+                            {autoSync
+                              ? <Zap className="h-4 w-4 text-amber-400" />
+                              : <ZapOff className="h-4 w-4 text-zinc-500" />
+                            }
+                            {t('sync.autoSync')}
+                          </span>
+                          {/* Toggle pill */}
+                          <span className={cn(
+                            'relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors',
+                            autoSync ? 'bg-amber-500' : 'bg-zinc-700',
+                          )}>
+                            <span className={cn(
+                              'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform',
+                              autoSync ? 'translate-x-4' : 'translate-x-0',
+                            )} />
+                          </span>
                         </button>
+
+                        <div className="border-t border-zinc-800 mt-1">
+                          <button
+                            onClick={handleSignOut}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-zinc-800 transition-colors"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            {t('auth.signOut')}
+                          </button>
+                        </div>
                       </div>
                     </>
                   )}

@@ -162,6 +162,10 @@ export const de = {
       syncNow: 'Jetzt synchronisieren',
       error: 'Sync-Fehler',
       lastSync: 'Letzter Sync: {{time}}',
+      autoSync: 'Auto-Sync',
+      autoSyncOn: 'Auto-Sync: An',
+      autoSyncOff: 'Auto-Sync: Aus',
+      autoSyncPending: 'Sync in Kürze...',
     },
     share: {
       setlist: 'Setlist teilen',

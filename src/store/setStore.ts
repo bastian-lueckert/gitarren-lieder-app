@@ -9,6 +9,10 @@ function getUserId() {
   return useAuthStore.getState().user?.id
 }
 
+function autoSync() {
+  useAuthStore.getState().triggerAutoSync()
+}
+
 interface SetStore {
   sets: SongSet[]
   loadSets: () => Promise<void>
@@ -37,6 +41,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     set((state) => ({ sets: [...state.sets, s] }))
     const userId = getUserId()
     if (userId) pushSet(s, userId).catch(() => {})
+    autoSync()
     return s
   },
 
@@ -47,6 +52,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     const updated = get().sets.find((s) => s.id === id)
     const userId = getUserId()
     if (updated && userId) pushSet(updated, userId).catch(() => {})
+    autoSync()
   },
 
   deleteSet: async (id) => {
@@ -54,6 +60,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     set((state) => ({ sets: state.sets.filter((s) => s.id !== id) }))
     const userId = getUserId()
     if (userId) deleteSetCloud(id, userId).catch(() => {})
+    autoSync()
   },
 
   addSongToSet: async (setId, songId) => {
@@ -65,6 +72,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     const updated = get().sets.find((s) => s.id === setId)
     const userId = getUserId()
     if (updated && userId) pushSet(updated, userId).catch(() => {})
+    autoSync()
   },
 
   removeSongFromSet: async (setId, songId) => {
@@ -76,6 +84,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     const updated = get().sets.find((s) => s.id === setId)
     const userId = getUserId()
     if (updated && userId) pushSet(updated, userId).catch(() => {})
+    autoSync()
   },
 
   moveSong: async (setId, songId, dir) => {
@@ -92,6 +101,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     const updated = get().sets.find((s) => s.id === setId)
     const userId = getUserId()
     if (updated && userId) pushSet(updated, userId).catch(() => {})
+    autoSync()
   },
 
   toggleSetShare: async (id) => {
@@ -106,6 +116,7 @@ export const useSetStore = create<SetStore>((set, get) => ({
     const updated = get().sets.find((s) => s.id === id)
     const userId = getUserId()
     if (updated && userId) pushSet(updated, userId).catch(() => {})
+    autoSync()
     return shareToken
   },
 

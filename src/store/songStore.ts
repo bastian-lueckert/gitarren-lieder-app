@@ -9,6 +9,10 @@ function getUserId() {
   return useAuthStore.getState().user?.id
 }
 
+function autoSync() {
+  useAuthStore.getState().triggerAutoSync()
+}
+
 interface SongStore {
   songs: Song[]
   loading: boolean
@@ -39,6 +43,7 @@ export const useSongStore = create<SongStore>((set, get) => ({
     set((state) => ({ songs: [song, ...state.songs] }))
     const userId = getUserId()
     if (userId) pushSong(song, userId).catch(() => {})
+    autoSync()
     return song
   },
 
@@ -51,6 +56,7 @@ export const useSongStore = create<SongStore>((set, get) => ({
     const updated = get().songs.find((s) => s.id === id)
     const userId = getUserId()
     if (updated && userId) pushSong(updated, userId).catch(() => {})
+    autoSync()
   },
 
   deleteSong: async (id) => {
@@ -58,6 +64,7 @@ export const useSongStore = create<SongStore>((set, get) => ({
     set((state) => ({ songs: state.songs.filter((s) => s.id !== id) }))
     const userId = getUserId()
     if (userId) deleteSongCloud(id, userId).catch(() => {})
+    autoSync()
   },
 
   deleteSongs: async (ids) => {
@@ -65,6 +72,7 @@ export const useSongStore = create<SongStore>((set, get) => ({
     set((state) => ({ songs: state.songs.filter((s) => !ids.includes(s.id)) }))
     const userId = getUserId()
     if (userId) deleteSongsCloud(ids, userId).catch(() => {})
+    autoSync()
   },
 
   markPracticed: async (id) => {
@@ -76,6 +84,7 @@ export const useSongStore = create<SongStore>((set, get) => ({
     const updated = get().songs.find((s) => s.id === id)
     const userId = getUserId()
     if (updated && userId) pushSong(updated, userId).catch(() => {})
+    autoSync()
   },
 
   toggleSongShare: async (id) => {
@@ -90,6 +99,7 @@ export const useSongStore = create<SongStore>((set, get) => ({
     const updated = get().songs.find((s) => s.id === id)
     const userId = getUserId()
     if (updated && userId) pushSong(updated, userId).catch(() => {})
+    autoSync()
     return shareToken
   },
 

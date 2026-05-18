@@ -162,6 +162,10 @@ export const en = {
       syncNow: 'Sync now',
       error: 'Sync error',
       lastSync: 'Last sync: {{time}}',
+      autoSync: 'Auto Sync',
+      autoSyncOn: 'Auto sync: On',
+      autoSyncOff: 'Auto sync: Off',
+      autoSyncPending: 'Sync soon...',
     },
     share: {
       setlist: 'Share Setlist',
