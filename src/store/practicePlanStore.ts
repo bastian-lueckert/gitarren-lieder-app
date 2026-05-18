@@ -1,8 +1,14 @@
 import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '@/db/database'
+import { pushPlan, deletePlanCloud } from '@/lib/sync'
+import { useAuthStore } from '@/store/authStore'
 import type { PracticePlan } from '@/types/practicePlan'
 import type { Song } from '@/types/song'
+
+function autoSync() {
+  useAuthStore.getState().triggerAutoSync()
+}
 
 const DEFAULT_PLAN_SIZE = 10
 
@@ -89,6 +95,9 @@ export const usePracticePlanStore = create<PracticePlanStore>((set, get) => ({
     }
     await db.plans.add(plan)
     set((state) => ({ plans: [plan, ...state.plans] }))
+    const userId = useAuthStore.getState().user?.id
+    if (userId) pushPlan(plan, userId).catch(() => {})
+    autoSync()
     return plan
   },
 
@@ -101,13 +110,20 @@ export const usePracticePlanStore = create<PracticePlanStore>((set, get) => ({
       : [...plan.completedIds, songId]
     const updatedAt = new Date()
     await db.plans.update(planId, { completedIds, updatedAt })
+    const updated = { ...plan, completedIds, updatedAt }
     set((state) => ({
-      plans: state.plans.map((p) => p.id === planId ? { ...p, completedIds, updatedAt } : p),
+      plans: state.plans.map((p) => p.id === planId ? updated : p),
     }))
+    const userId = useAuthStore.getState().user?.id
+    if (userId) pushPlan(updated, userId).catch(() => {})
+    autoSync()
   },
 
   deletePlan: async (id) => {
     await db.plans.delete(id)
     set((state) => ({ plans: state.plans.filter((p) => p.id !== id) }))
+    const userId = useAuthStore.getState().user?.id
+    if (userId) deletePlanCloud(id, userId).catch(() => {})
+    autoSync()
   },
 }))

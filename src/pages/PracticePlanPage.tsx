@@ -161,7 +161,7 @@ export function PracticePlanPage() {
 
               {/* Practice button */}
               <button
-                onClick={() => navigate(`/songs/${song.id}/practice`)}
+                onClick={() => navigate(`/songs/${song.id}/practice`, { state: { planId: plan!.id } })}
                 className="shrink-0 p-1.5 rounded hover:bg-zinc-700 text-zinc-500 hover:text-amber-400 transition-colors"
                 title={t('plan.practiceNow')}
               >

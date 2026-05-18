@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { db } from '@/db/database'
 import type { Song } from '@/types/song'
 import type { SongSet } from '@/types/set'
+import type { PracticePlan } from '@/types/practicePlan'
 
 // ── Row types (Supabase snake_case) ──────────────────────────────────────────
 
@@ -18,6 +19,12 @@ interface SongRow {
 interface SetRow {
   id: string; user_id: string; name: string; description: string | null
   song_ids: string[]; share_token: string | null; created_at: string; updated_at: string
+}
+
+interface PlanRow {
+  id: string; user_id: string; date: string
+  song_ids: string[]; completed_ids: string[]
+  created_at: string; updated_at: string
 }
 
 // ── Conversion helpers ────────────────────────────────────────────────────────
@@ -69,6 +76,22 @@ function rowToSet(r: SetRow): SongSet {
   }
 }
 
+function planToRow(p: PracticePlan, userId: string): PlanRow {
+  return {
+    id: p.id, user_id: userId, date: p.date,
+    song_ids: p.songIds, completed_ids: p.completedIds,
+    created_at: p.createdAt.toISOString(), updated_at: p.updatedAt.toISOString(),
+  }
+}
+
+function rowToPlan(r: PlanRow): PracticePlan {
+  return {
+    id: r.id, date: r.date,
+    songIds: r.song_ids, completedIds: r.completed_ids,
+    createdAt: new Date(r.created_at), updatedAt: new Date(r.updated_at),
+  }
+}
+
 // ── Per-mutation push (fire-and-forget from stores) ───────────────────────────
 
 export async function pushSong(song: Song, userId: string): Promise<void> {
@@ -91,12 +114,21 @@ export async function deleteSetCloud(id: string, userId: string): Promise<void> 
   await supabase.from('sets').delete().eq('id', id).eq('user_id', userId)
 }
 
+export async function pushPlan(plan: PracticePlan, userId: string): Promise<void> {
+  await supabase.from('plans').upsert(planToRow(plan, userId))
+}
+
+export async function deletePlanCloud(id: string, userId: string): Promise<void> {
+  await supabase.from('plans').delete().eq('id', id).eq('user_id', userId)
+}
+
 // ── Full sync: push local-only additions first, then cloud overwrites local ───
 
 export async function syncAll(userId: string): Promise<void> {
-  const [localSongs, localSets] = await Promise.all([
+  const [localSongs, localSets, localPlans] = await Promise.all([
     db.songs.toArray(),
     db.sets.toArray(),
+    db.plans.toArray(),
   ])
 
   // Push all local data first so offline-only additions reach the cloud
@@ -106,24 +138,27 @@ export async function syncAll(userId: string): Promise<void> {
   if (localSets.length > 0) {
     await supabase.from('sets').upsert(localSets.map((s) => setToRow(s, userId)), { ignoreDuplicates: false })
   }
+  if (localPlans.length > 0) {
+    await supabase.from('plans').upsert(localPlans.map((p) => planToRow(p, userId)), { ignoreDuplicates: false })
+  }
 
   // Pull all cloud data and replace local completely — cloud is the source of truth
-  const [{ data: remoteSongs }, { data: remoteSets }] = await Promise.all([
+  const [{ data: remoteSongs }, { data: remoteSets }, { data: remotePlans }] = await Promise.all([
     supabase.from('songs').select('*').eq('user_id', userId),
     supabase.from('sets').select('*').eq('user_id', userId),
+    supabase.from('plans').select('*').eq('user_id', userId),
   ])
 
   if (remoteSongs !== null) {
     await db.songs.clear()
-    if (remoteSongs.length > 0) {
-      await db.songs.bulkPut((remoteSongs as SongRow[]).map(rowToSong))
-    }
+    if (remoteSongs.length > 0) await db.songs.bulkPut((remoteSongs as SongRow[]).map(rowToSong))
   }
-
   if (remoteSets !== null) {
     await db.sets.clear()
-    if (remoteSets.length > 0) {
-      await db.sets.bulkPut((remoteSets as SetRow[]).map(rowToSet))
-    }
+    if (remoteSets.length > 0) await db.sets.bulkPut((remoteSets as SetRow[]).map(rowToSet))
+  }
+  if (remotePlans !== null) {
+    await db.plans.clear()
+    if (remotePlans.length > 0) await db.plans.bulkPut((remotePlans as PlanRow[]).map(rowToPlan))
   }
 }

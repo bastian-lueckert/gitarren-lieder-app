@@ -9,6 +9,7 @@ import {
 import { useWakeLock } from '@/hooks/useWakeLock'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
+import { usePracticePlanStore } from '@/store/practicePlanStore'
 import { Metronome } from '@/components/Metronome'
 import { ChordSheet } from '@/components/ChordSheet'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,7 @@ export function PracticePage() {
   const { t } = useTranslation()
   const { getSong, updateSong, markPracticed } = useSongStore()
   const { sets } = useSetStore()
+  const { toggleCompleted } = usePracticePlanStore()
   const song = getSong(id!)
 
   const [localBpm, setLocalBpm] = useState(song?.bpm ?? 120)
@@ -57,6 +59,9 @@ export function PracticePage() {
   const [metroPlaying, setMetroPlaying] = useState(false)
 
   const fontRem = FONT_SIZES[fontIdx]
+
+  // Plan context — when navigated from a practice plan
+  const planId = (location.state as { planId?: string; setId?: string } | null)?.planId
 
   // Set navigation context
   const setId = (location.state as { setId?: string; songIndex?: number } | null)?.setId
@@ -154,9 +159,11 @@ export function PracticePage() {
   async function handleMarkPracticed() {
     await markPracticed(id!)
     if (localBpm !== song!.bpm) await updateSong(id!, { bpm: localBpm })
+    if (planId) await toggleCompleted(planId, id!)
     setPracticed(true)
     setTimeout(() => {
-      if (nextSongId) goToPractice(nextSongId, posInSet + 1)
+      if (planId) navigate(`/practice-plan/${planId}`)
+      else if (nextSongId) goToPractice(nextSongId, posInSet + 1)
       else if (currentSet) navigate(`/sets/${setId}`)
       else navigate(`/songs/${id}`)
     }, 1000)
@@ -174,11 +181,11 @@ export function PracticePage() {
         {/* Back + practiced */}
         <div className="shrink-0 flex items-center justify-between gap-4">
           <button
-            onClick={() => navigate(`/songs/${id}`, { state: location.state })}
+            onClick={() => planId ? navigate(`/practice-plan/${planId}`) : navigate(`/songs/${id}`, { state: location.state })}
             className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors text-sm min-w-0"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" />
-            <span className="truncate">{song.title}</span>
+            <span className="truncate">{planId ? t('plan.title') : song.title}</span>
           </button>
           <Button onClick={handleMarkPracticed} variant={practiced ? 'secondary' : 'default'} size="sm" disabled={practiced} className="shrink-0">
             <CheckCircle2 className="h-4 w-4" />
