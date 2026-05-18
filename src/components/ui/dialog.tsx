@@ -32,9 +32,21 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] rounded-xl border border-zinc-700 bg-zinc-900 p-6 shadow-xl duration-200',
-        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-        'max-h-[90vh] overflow-y-auto',
+        // Mobile: bottom sheet sliding up
+        'fixed bottom-0 left-0 right-0 z-50 w-full',
+        'rounded-t-2xl border-t border-x border-zinc-700 bg-zinc-900 p-6 shadow-xl',
+        'max-h-[92dvh] overflow-y-auto',
+        'pb-[env(safe-area-inset-bottom,16px)]',
+        // Desktop: centered modal
+        'sm:bottom-auto sm:left-[50%] sm:top-[50%] sm:max-w-lg',
+        'sm:translate-x-[-50%] sm:translate-y-[-50%]',
+        'sm:rounded-xl sm:border sm:max-h-[90vh]',
+        'sm:pb-6',
+        // Animations
+        'data-[state=open]:animate-in data-[state=closed]:animate-out',
+        'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'data-[state=open]:slide-in-from-bottom-4 sm:data-[state=open]:slide-in-from-bottom-0',
+        'sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95',
         className
       )}
       {...props}

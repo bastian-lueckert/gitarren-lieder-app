@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Edit, Trash2, Play, Music, Gauge, Hash, BookOpen, ExternalLink, ChevronLeft, ChevronRight, FileDown, Share2, Link, Unlink } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Play, Music, Gauge, Hash, BookOpen, ExternalLink, ChevronLeft, ChevronRight, FileDown, Share2, Link, Unlink, Download, Loader2 } from 'lucide-react'
+import { YouTubeIcon } from '@/components/YouTubeIcon'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
 import { SongForm } from '@/components/SongForm'
@@ -15,6 +16,8 @@ import { formatDate } from '@/lib/utils'
 import { extractChordsFromText, lookupChord } from '@/lib/chords'
 import { ChordDiagram } from '@/components/ChordDiagram'
 import { exportSongPdf } from '@/lib/exportPdf'
+import { fetchUGChords } from '@/lib/ugChords'
+import { ChordSheet } from '@/components/ChordSheet'
 import type { SongFormData } from '@/types/song'
 
 export function SongDetailPage() {
@@ -31,6 +34,8 @@ export function SongDetailPage() {
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [shareLinkCopied, setShareLinkCopied] = useState(false)
   const [coverFailed, setCoverFailed] = useState(false)
+  const [loadingChords, setLoadingChords] = useState(false)
+  const [chordsLoadError, setChordsLoadError] = useState(false)
 
   // Set navigation context (passed via location.state from SetDetailPage)
   const setId = (location.state as { setId?: string; songIndex?: number } | null)?.setId
@@ -63,6 +68,22 @@ export function SongDetailPage() {
   async function handleDelete() {
     await deleteSong(id!)
     navigate('/')
+  }
+
+  async function handleLoadChords() {
+    setLoadingChords(true)
+    setChordsLoadError(false)
+    try {
+      const chords = await fetchUGChords(song!.artist, song!.title)
+      if (chords) {
+        await updateSong(id!, { chords })
+      } else {
+        setChordsLoadError(true)
+        setTimeout(() => setChordsLoadError(false), 4000)
+      }
+    } finally {
+      setLoadingChords(false)
+    }
   }
 
   const chordNames = useMemo(() => extractChordsFromText(song.chords ?? ''), [song.chords])
@@ -120,9 +141,9 @@ export function SongDetailPage() {
             target="_blank"
             rel="noopener noreferrer"
             title={t('songOfDay.youtube')}
-            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+            className="inline-flex items-center justify-center h-8 w-8 rounded-md text-zinc-600 hover:text-[#FF0000] hover:bg-zinc-800 transition-colors"
           >
-            <ExternalLink className="h-4 w-4" />
+            <YouTubeIcon className="h-4 w-4" />
           </a>
           <Button variant="ghost" size="icon-sm" onClick={() => exportSongPdf(song)} title={t('share.exportPdf')}>
             <FileDown className="h-4 w-4 text-zinc-400" />
@@ -232,12 +253,43 @@ export function SongDetailPage() {
               ))}
             </div>
           )}
+          {chordsLoadError && (
+            <p className="text-sm text-red-400 text-center py-1">{t('song.chordsNotFound')}</p>
+          )}
           {song.chords ? (
-            <pre className="whitespace-pre-wrap font-mono text-sm text-zinc-300 bg-zinc-900 rounded-xl p-4 border border-zinc-800 leading-relaxed overflow-x-auto">
-              {song.chords}
-            </pre>
+            <>
+              <ChordSheet
+                content={song.chords}
+                fontSize={0.875}
+                className="bg-zinc-900 rounded-xl border border-zinc-800 p-4"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadChords}
+                disabled={loadingChords}
+                className="w-full"
+              >
+                {loadingChords
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <Download className="h-3.5 w-3.5" />}
+                {t('song.reloadChords')}
+              </Button>
+            </>
           ) : (
-            <EmptyContent onEdit={() => setShowEditDialog(true)} label={t('song.chords')} />
+            <div className="space-y-2">
+              <Button
+                onClick={handleLoadChords}
+                disabled={loadingChords}
+                className="w-full"
+              >
+                {loadingChords
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <Download className="h-4 w-4" />}
+                {t('song.loadChords')}
+              </Button>
+              <EmptyContent onEdit={() => setShowEditDialog(true)} label={t('song.chords')} />
+            </div>
           )}
         </TabsContent>
 

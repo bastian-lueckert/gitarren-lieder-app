@@ -23,6 +23,12 @@ export const en = {
       sortPracticed: 'Recently practiced',
       showAll: 'Show all {{n}} songs',
       showLess: 'Show less',
+      select: 'Select',
+      cancelSelect: 'Cancel',
+      deleteSelected: 'Delete {{n}}',
+      confirmDeleteSelected: 'Delete {{n}} songs?',
+      selectAll: 'All',
+      deselectAll: 'None',
     },
     song: {
       title: 'Title',
@@ -42,6 +48,9 @@ export const en = {
       noCapo: 'No capo',
       capoFret: 'Fret {{n}}',
       findTabs: 'Find Tabs & Chords on Ultimate Guitar →',
+      loadChords: 'Auto-load chords',
+      reloadChords: 'Reload chords',
+      chordsNotFound: 'No chords found – please enter them manually.',
     },
     sets: {
       title: 'Sets',

@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, CheckCircle2, Circle, Play, Music, Trash2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Circle, Play, Music, Trash2 } from 'lucide-react'
+import { YouTubeIcon } from '@/components/YouTubeIcon'
 import { usePracticePlanStore } from '@/store/practicePlanStore'
 import { useSongStore } from '@/store/songStore'
 import { Button } from '@/components/ui/button'
@@ -153,9 +154,9 @@ export function PracticePlanPage() {
                 rel="noopener noreferrer"
                 title={t('songOfDay.youtube')}
                 onClick={(e) => e.stopPropagation()}
-                className="shrink-0 p-1.5 rounded hover:bg-zinc-700 text-zinc-500 hover:text-red-400 transition-colors"
+                className="shrink-0 p-1.5 rounded hover:bg-zinc-700 text-zinc-600 hover:text-[#FF0000] transition-colors"
               >
-                <ExternalLink className="h-4 w-4" />
+                <YouTubeIcon className="h-4 w-4" />
               </a>
 
               {/* Practice button */}

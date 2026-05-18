@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '@/db/database'
 import type { Song, SongFormData } from '@/types/song'
-import { pushSong, deleteSongCloud } from '@/lib/sync'
+import { pushSong, deleteSongCloud, deleteSongsCloud } from '@/lib/sync'
 import { useAuthStore } from '@/store/authStore'
 
 function getUserId() {
@@ -16,6 +16,7 @@ interface SongStore {
   addSong: (data: SongFormData) => Promise<Song>
   updateSong: (id: string, data: Partial<SongFormData>) => Promise<void>
   deleteSong: (id: string) => Promise<void>
+  deleteSongs: (ids: string[]) => Promise<void>
   markPracticed: (id: string) => Promise<void>
   toggleSongShare: (id: string) => Promise<string | null>
   getSong: (id: string) => Song | undefined
@@ -57,6 +58,13 @@ export const useSongStore = create<SongStore>((set, get) => ({
     set((state) => ({ songs: state.songs.filter((s) => s.id !== id) }))
     const userId = getUserId()
     if (userId) deleteSongCloud(id, userId).catch(() => {})
+  },
+
+  deleteSongs: async (ids) => {
+    await db.songs.bulkDelete(ids)
+    set((state) => ({ songs: state.songs.filter((s) => !ids.includes(s.id)) }))
+    const userId = getUserId()
+    if (userId) deleteSongsCloud(ids, userId).catch(() => {})
   },
 
   markPracticed: async (id) => {

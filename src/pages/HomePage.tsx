@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Plus, Download, Search, Guitar, ListMusic, ChevronRight, Clock, CalendarDays, CheckCircle2, Dices, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { Plus, Download, Search, Guitar, ListMusic, ChevronRight, Clock, CalendarDays, CheckCircle2, Dices, ChevronDown, ChevronUp, Trash2, X } from 'lucide-react'
+import { YouTubeIcon } from '@/components/YouTubeIcon'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
 import { usePracticePlanStore } from '@/store/practicePlanStore'
@@ -30,7 +31,7 @@ function planDateLabel(dateStr: string, t: ReturnType<typeof useTranslation>['t'
 export function HomePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { songs, addSong } = useSongStore()
+  const { songs, addSong, deleteSongs } = useSongStore()
   const { sets } = useSetStore()
   const { plans, todaysPlan, generatePlan } = usePracticePlanStore()
 
@@ -40,6 +41,9 @@ export function HomePage() {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [addDialogInitial, setAddDialogInitial] = useState<{ artist?: string; title?: string } | undefined>()
   const [songsExpanded, setSongsExpanded] = useState(false)
+  const [selectionMode, setSelectionMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const COLLAPSE_LIMIT = 7
   const dailySong = getSongOfTheDay()
@@ -69,6 +73,36 @@ export function HomePage() {
   async function handleAdd(data: SongFormData) {
     const song = await addSong(data)
     navigate(`/songs/${song.id}`)
+  }
+
+  function toggleSelection(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+    setConfirmDelete(false)
+  }
+
+  function exitSelectionMode() {
+    setSelectionMode(false)
+    setSelectedIds(new Set())
+    setConfirmDelete(false)
+  }
+
+  function selectAll() {
+    setSelectedIds(new Set(filtered.map((s) => s.id)))
+    setConfirmDelete(false)
+  }
+
+  async function handleDeleteSelected() {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    await deleteSongs([...selectedIds])
+    exitSelectionMode()
   }
 
   function setTotalDuration(songIds: string[]) {
@@ -117,12 +151,24 @@ export function HomePage() {
           </button>
         </div>
 
-        {tab === 'songs' ? (
-          <Button size="sm" onClick={() => { setAddDialogInitial(undefined); setShowAddDialog(true) }}>
-            <Plus className="h-4 w-4" />
-            {t('songs.addNew')}
+        {tab === 'songs' && !selectionMode && (
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => { setSelectionMode(true); setSongsExpanded(true) }} className="text-zinc-400">
+              {t('songs.select')}
+            </Button>
+            <Button size="sm" onClick={() => { setAddDialogInitial(undefined); setShowAddDialog(true) }}>
+              <Plus className="h-4 w-4" />
+              {t('songs.addNew')}
+            </Button>
+          </div>
+        )}
+        {tab === 'songs' && selectionMode && (
+          <Button size="sm" variant="outline" onClick={exitSelectionMode} className="text-zinc-400">
+            <X className="h-4 w-4" />
+            {t('songs.cancelSelect')}
           </Button>
-        ) : (
+        )}
+        {tab !== 'songs' && (
           <Button size="sm" onClick={() => navigate('/sets')}>
             <Plus className="h-4 w-4" />
             {t('sets.create')}
@@ -157,8 +203,8 @@ export function HomePage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button size="sm" variant="outline">
-                  <ExternalLink className="h-4 w-4" />
+                <Button size="sm" variant="outline" className="hover:text-[#FF0000] hover:border-red-500/40">
+                  <YouTubeIcon className="h-4 w-4" />
                   {t('songOfDay.youtube')}
                 </Button>
               </a>
@@ -199,10 +245,37 @@ export function HomePage() {
             </div>
           ) : (
             <div className="space-y-2">
-              {(songsExpanded || filtered.length <= COLLAPSE_LIMIT ? filtered : filtered.slice(0, COLLAPSE_LIMIT)).map((song) => (
-                <SongCard key={song.id} song={song} onClick={() => navigate(`/songs/${song.id}`)} />
+              {selectionMode && filtered.length > 0 && (
+                <div className="flex items-center gap-2 px-1">
+                  <button
+                    onClick={selectAll}
+                    className="text-xs text-amber-500 hover:text-amber-400 transition-colors"
+                  >
+                    {t('songs.selectAll')}
+                  </button>
+                  <span className="text-zinc-700">·</span>
+                  <button
+                    onClick={() => { setSelectedIds(new Set()); setConfirmDelete(false) }}
+                    className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    {t('songs.deselectAll')}
+                  </button>
+                  {selectedIds.size > 0 && (
+                    <span className="ml-auto text-xs text-zinc-500">{selectedIds.size} ausgewählt</span>
+                  )}
+                </div>
+              )}
+              {(songsExpanded || selectionMode || filtered.length <= COLLAPSE_LIMIT ? filtered : filtered.slice(0, COLLAPSE_LIMIT)).map((song) => (
+                <SongCard
+                  key={song.id}
+                  song={song}
+                  onClick={() => navigate(`/songs/${song.id}`)}
+                  selectionMode={selectionMode}
+                  selected={selectedIds.has(song.id)}
+                  onSelect={() => toggleSelection(song.id)}
+                />
               ))}
-              {filtered.length > COLLAPSE_LIMIT && (
+              {!selectionMode && filtered.length > COLLAPSE_LIMIT && (
                 <button
                   onClick={() => setSongsExpanded((e) => !e)}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-all text-sm"
@@ -212,6 +285,25 @@ export function HomePage() {
                     : <><ChevronDown className="h-4 w-4" /> {t('songs.showAll', { n: filtered.length })}</>
                   }
                 </button>
+              )}
+              {selectionMode && selectedIds.size > 0 && (
+                <div className="sticky bottom-4 pt-2">
+                  <button
+                    onClick={handleDeleteSelected}
+                    className={cn(
+                      'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg',
+                      confirmDelete
+                        ? 'bg-red-600 hover:bg-red-500 text-white'
+                        : 'bg-zinc-800 hover:bg-zinc-700 text-red-400 border border-red-500/30',
+                    )}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {confirmDelete
+                      ? t('songs.confirmDeleteSelected', { n: selectedIds.size })
+                      : t('songs.deleteSelected', { n: selectedIds.size })
+                    }
+                  </button>
+                </div>
               )}
             </div>
           )}

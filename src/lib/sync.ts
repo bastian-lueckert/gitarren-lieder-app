@@ -83,11 +83,15 @@ export async function deleteSongCloud(id: string, userId: string): Promise<void>
   await supabase.from('songs').delete().eq('id', id).eq('user_id', userId)
 }
 
+export async function deleteSongsCloud(ids: string[], userId: string): Promise<void> {
+  await supabase.from('songs').delete().in('id', ids).eq('user_id', userId)
+}
+
 export async function deleteSetCloud(id: string, userId: string): Promise<void> {
   await supabase.from('sets').delete().eq('id', id).eq('user_id', userId)
 }
 
-// ── Full sync: push all local, then pull and merge newer remote ───────────────
+// ── Full sync: push local-only additions first, then cloud overwrites local ───
 
 export async function syncAll(userId: string): Promise<void> {
   const [localSongs, localSets] = await Promise.all([
@@ -95,35 +99,31 @@ export async function syncAll(userId: string): Promise<void> {
     db.sets.toArray(),
   ])
 
-  // Push all local to cloud (upsert = create or overwrite)
+  // Push all local data first so offline-only additions reach the cloud
   if (localSongs.length > 0) {
-    await supabase.from('songs').upsert(localSongs.map((s) => songToRow(s, userId)))
+    await supabase.from('songs').upsert(localSongs.map((s) => songToRow(s, userId)), { ignoreDuplicates: false })
   }
   if (localSets.length > 0) {
-    await supabase.from('sets').upsert(localSets.map((s) => setToRow(s, userId)))
+    await supabase.from('sets').upsert(localSets.map((s) => setToRow(s, userId)), { ignoreDuplicates: false })
   }
 
-  // Pull remote and merge: only update local if remote is newer or missing locally
+  // Pull all cloud data and replace local completely — cloud is the source of truth
   const [{ data: remoteSongs }, { data: remoteSets }] = await Promise.all([
     supabase.from('songs').select('*').eq('user_id', userId),
     supabase.from('sets').select('*').eq('user_id', userId),
   ])
 
-  if (remoteSongs) {
-    for (const row of remoteSongs as SongRow[]) {
-      const local = localSongs.find((s) => s.id === row.id)
-      if (!local || new Date(row.updated_at) > local.updatedAt) {
-        await db.songs.put(rowToSong(row))
-      }
+  if (remoteSongs !== null) {
+    await db.songs.clear()
+    if (remoteSongs.length > 0) {
+      await db.songs.bulkPut((remoteSongs as SongRow[]).map(rowToSong))
     }
   }
 
-  if (remoteSets) {
-    for (const row of remoteSets as SetRow[]) {
-      const local = localSets.find((s) => s.id === row.id)
-      if (!local || new Date(row.updated_at) > local.updatedAt) {
-        await db.sets.put(rowToSet(row))
-      }
+  if (remoteSets !== null) {
+    await db.sets.clear()
+    if (remoteSets.length > 0) {
+      await db.sets.bulkPut((remoteSets as SetRow[]).map(rowToSet))
     }
   }
 }

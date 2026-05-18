@@ -5,19 +5,21 @@ import {
   ArrowLeft, CheckCircle2, Music, ScrollText, PauseCircle,
   ALargeSmall, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Gauge,
 } from 'lucide-react'
+import { useWakeLock } from '@/hooks/useWakeLock'
 import { useSongStore } from '@/store/songStore'
 import { useSetStore } from '@/store/setStore'
 import { Metronome } from '@/components/Metronome'
+import { ChordSheet } from '@/components/ChordSheet'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import type { DrumPattern, TimeSignature } from '@/types/song'
 
-const FONT_SIZES = [0.75, 0.875, 1, 1.125, 1.375, 1.625] as const
-const FONT_LABELS = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const
+const FONT_SIZES = [0.625, 0.75, 0.875, 1, 1.125, 1.375, 1.625] as const
+const FONT_LABELS = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL'] as const
 const LINE_HEIGHT = 1.75
-const DEFAULT_FONT_IDX = 2
+const DEFAULT_FONT_IDX = 3
 const DEFAULT_LINES_PER_SEC = 1.0
 
 function linesToPx(linesPerSec: number, fontRem: number) {
@@ -30,6 +32,7 @@ function loadPref<T>(key: string, fallback: T): T {
 }
 
 export function PracticePage() {
+  useWakeLock()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -266,12 +269,12 @@ export function PracticePage() {
         >
           <TabsContent value="chords" className="mt-0">
             {song.chords ? (
-              <pre
-                className="whitespace-pre-wrap font-mono text-zinc-200 p-4 leading-relaxed select-text"
-                style={{ fontSize: `${fontRem}rem`, lineHeight: LINE_HEIGHT }}
-              >
-                {song.chords}
-              </pre>
+              <ChordSheet
+                content={song.chords}
+                fontSize={fontRem}
+                lineHeight={LINE_HEIGHT}
+                className="p-4"
+              />
             ) : (
               <p className="text-center text-zinc-600 py-12 text-sm">{t('song.chords')} —</p>
             )}

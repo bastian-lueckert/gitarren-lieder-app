@@ -23,6 +23,12 @@ export const de = {
       sortPracticed: 'Zuletzt geübt',
       showAll: 'Alle {{n}} Lieder anzeigen',
       showLess: 'Weniger anzeigen',
+      select: 'Auswählen',
+      cancelSelect: 'Abbrechen',
+      deleteSelected: '{{n}} löschen',
+      confirmDeleteSelected: '{{n}} Lieder wirklich löschen?',
+      selectAll: 'Alle',
+      deselectAll: 'Keine',
     },
     song: {
       title: 'Titel',
@@ -42,6 +48,9 @@ export const de = {
       noCapo: 'Kein Kapodaster',
       capoFret: 'Bund {{n}}',
       findTabs: 'Tabs & Akkorde auf Ultimate Guitar suchen →',
+      loadChords: 'Akkorde automatisch laden',
+      reloadChords: 'Akkorde neu laden',
+      chordsNotFound: 'Keine Akkorde gefunden – bitte manuell einfügen.',
     },
     sets: {
       title: 'Sets',

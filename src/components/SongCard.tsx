@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Music, Clock, Gauge, Timer, ChevronRight, ExternalLink } from 'lucide-react'
+import { Music, Clock, Gauge, Timer, ChevronRight, Check } from 'lucide-react'
+import { YouTubeIcon } from '@/components/YouTubeIcon'
 import type { Song } from '@/types/song'
 import { formatDate, formatDurationSec } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -8,6 +9,9 @@ import { cn } from '@/lib/utils'
 interface SongCardProps {
   song: Song
   onClick: () => void
+  selectionMode?: boolean
+  selected?: boolean
+  onSelect?: () => void
 }
 
 function CoverArt({ url }: { url: string }) {
@@ -23,23 +27,54 @@ function CoverArt({ url }: { url: string }) {
   )
 }
 
-export function SongCard({ song, onClick }: SongCardProps) {
+export function SongCard({ song, onClick, selectionMode, selected, onSelect }: SongCardProps) {
   const { t, i18n } = useTranslation()
   const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`
+
+  function handleClick() {
+    if (selectionMode) {
+      onSelect?.()
+    } else {
+      onClick()
+    }
+  }
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={onClick}
-      onKeyDown={(e) => e.key === 'Enter' && onClick()}
-      className="w-full flex items-center gap-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50 transition-all p-4 text-left group cursor-pointer"
+      onClick={handleClick}
+      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      className={cn(
+        'w-full flex items-center gap-4 rounded-xl border transition-all p-4 text-left group cursor-pointer',
+        selected
+          ? 'bg-amber-500/10 border-amber-500/50'
+          : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50',
+      )}
     >
-      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center group-hover:bg-amber-500/10 transition-colors overflow-hidden">
-        {song.coverUrl
-          ? <CoverArt url={song.coverUrl} />
-          : <Music className="h-6 w-6 text-zinc-500 group-hover:text-amber-500 transition-colors" />
-        }
+      {/* Checkbox in selection mode, cover art otherwise */}
+      <div className="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center overflow-hidden transition-colors"
+        style={{ background: selected ? 'rgba(245,158,11,0.15)' : undefined }}
+      >
+        {selectionMode ? (
+          <div className={cn(
+            'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
+            selected
+              ? 'bg-amber-500 border-amber-500'
+              : 'border-zinc-600 bg-zinc-800',
+          )}>
+            {selected && <Check className="h-3.5 w-3.5 text-zinc-950" strokeWidth={3} />}
+          </div>
+        ) : (
+          <div className={cn(
+            'w-full h-full rounded-lg bg-zinc-800 flex items-center justify-center group-hover:bg-amber-500/10 transition-colors overflow-hidden',
+          )}>
+            {song.coverUrl
+              ? <CoverArt url={song.coverUrl} />
+              : <Music className="h-6 w-6 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+            }
+          </div>
+        )}
       </div>
 
       <div className="flex-1 min-w-0">
@@ -75,25 +110,29 @@ export function SongCard({ song, onClick }: SongCardProps) {
         </div>
       </div>
 
-      {song.practiceCount != null && song.practiceCount > 0 && (
+      {!selectionMode && song.practiceCount != null && song.practiceCount > 0 && (
         <div className="flex-shrink-0 text-center">
           <p className="text-lg font-bold text-amber-500">{song.practiceCount}</p>
           <p className="text-xs text-zinc-600">{t('song.practiceCount')}</p>
         </div>
       )}
 
-      <a
-        href={ytUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        title={t('songOfDay.youtube')}
-        className="flex-shrink-0 p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-zinc-700 transition-colors"
-      >
-        <ExternalLink className="h-4 w-4" />
-      </a>
+      {!selectionMode && (
+        <a
+          href={ytUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          title={t('songOfDay.youtube')}
+          className="flex-shrink-0 p-1.5 rounded-lg text-zinc-600 hover:text-[#FF0000] hover:bg-zinc-700 transition-colors"
+        >
+          <YouTubeIcon className="h-4 w-4" />
+        </a>
+      )}
 
-      <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0" />
+      {!selectionMode && (
+        <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0" />
+      )}
     </div>
   )
 }

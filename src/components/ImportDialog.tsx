@@ -11,6 +11,7 @@ import { searchMusicBrainz, mbRecordingToSongData, type MBRecording } from '@/li
 import { fetchLyrics } from '@/lib/lyrics'
 import { fetchBpmFromDeezer } from '@/lib/deezer'
 import { fetchCoverArt } from '@/lib/coverart'
+import { fetchUGChords } from '@/lib/ugChords'
 import { formatDuration } from '@/lib/utils'
 import type { Song, SongFormData } from '@/types/song'
 
@@ -73,15 +74,17 @@ export function AddSongDialog({ open, onOpenChange, onSave, initialArtist, initi
   async function handleSelect(rec: MBRecording) {
     setStep('loading')
     const base = mbRecordingToSongData(rec)
-    const [lyrics, deezerBpm, coverUrl] = await Promise.all([
+    const [lyrics, deezerBpm, coverUrl, chords] = await Promise.all([
       fetchLyrics(base.artist, base.title),
       fetchBpmFromDeezer(base.artist, base.title),
       fetchCoverArt(base.artist, base.title),
+      fetchUGChords(base.artist, base.title),
     ])
     setPrefill({
       title: base.title,
       artist: base.artist,
       lyrics: lyrics ?? undefined,
+      chords: chords ?? undefined,
       bpm: deezerBpm ?? 120,
       durationSec: base.durationSec,
       coverUrl: coverUrl ?? undefined,
