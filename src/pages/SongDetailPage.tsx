@@ -66,8 +66,9 @@ export function SongDetailPage() {
   }
 
   async function handleDelete() {
-    await deleteSong(id!)
+    setShowDeleteDialog(false)
     navigate('/')
+    deleteSong(id!).catch(() => {})
   }
 
   async function handleLoadChords() {

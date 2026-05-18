@@ -244,7 +244,7 @@ export function HomePage() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className={cn('space-y-2', selectionMode && selectedIds.size > 0 && 'pb-24')}>
               {selectionMode && filtered.length > 0 && (
                 <div className="flex items-center gap-2 px-1">
                   <button
@@ -287,11 +287,11 @@ export function HomePage() {
                 </button>
               )}
               {selectionMode && selectedIds.size > 0 && (
-                <div className="sticky bottom-4 pt-2">
+                <div className="fixed bottom-4 left-4 right-4 z-50 max-w-2xl mx-auto">
                   <button
                     onClick={handleDeleteSelected}
                     className={cn(
-                      'w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg',
+                      'w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm transition-all shadow-2xl',
                       confirmDelete
                         ? 'bg-red-600 hover:bg-red-500 text-white'
                         : 'bg-zinc-800 hover:bg-zinc-700 text-red-400 border border-red-500/30',
