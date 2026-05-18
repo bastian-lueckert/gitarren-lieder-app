@@ -1,34 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Download, ExternalLink, Star, TrendingUp, ArrowLeft } from 'lucide-react'
+import { Download, ExternalLink, TrendingUp, ArrowLeft } from 'lucide-react'
 import { YouTubeIcon } from '@/components/YouTubeIcon'
-import { Button } from '@/components/ui/button'
 import { AddSongDialog } from '@/components/ImportDialog'
 import { useSongStore } from '@/store/songStore'
 import { fetchUGPopular, type UGTab } from '@/lib/ugPopular'
 import type { SongFormData } from '@/types/song'
 import { cn } from '@/lib/utils'
 
+const ALL_TABS = await Promise.resolve(fetchUGPopular())
+
 export function ChartsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { songs, addSong } = useSongStore()
 
-  const [tabs, setTabs] = useState<UGTab[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
   const [importTarget, setImportTarget] = useState<{ artist: string; title: string } | null>(null)
-
-  useEffect(() => {
-    fetchUGPopular()
-      .then((data) => {
-        if (data.length === 0) setError(true)
-        else setTabs(data)
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
-  }, [])
 
   async function handleSave(data: SongFormData) {
     const song = await addSong(data)
@@ -52,55 +40,26 @@ export function ChartsPage() {
       </div>
       <p className="text-sm text-zinc-500 pl-10">{t('charts.subtitle')}</p>
 
-      {/* Loading */}
-      {loading && (
-        <div className="space-y-2 pt-2">
-          {Array.from({ length: 10 }, (_, i) => (
-            <div key={i} className="h-16 rounded-xl bg-zinc-900 border border-zinc-800 animate-pulse" />
-          ))}
-        </div>
-      )}
-
-      {/* Error */}
-      {!loading && error && (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-zinc-500">
-          <TrendingUp className="h-12 w-12 opacity-30" />
-          <p>{t('charts.error')}</p>
-          <a
-            href="https://www.ultimate-guitar.com/explore?type[]=Chords&order=hitstotal_filtered_aggregate"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button variant="outline" size="sm">
-              <ExternalLink className="h-4 w-4" />
-              {t('charts.openUG')}
-            </Button>
-          </a>
-        </div>
-      )}
-
       {/* Chart list */}
-      {!loading && !error && (
-        <div className="space-y-2">
-          {tabs.map((tab, index) => {
-            const inLibrary = songs.some(
-              (s) =>
-                s.title.toLowerCase() === tab.song.toLowerCase() &&
-                s.artist.toLowerCase() === tab.artist.toLowerCase(),
-            )
-            return (
-              <ChartRow
-                key={tab.id}
-                rank={index + 1}
-                tab={tab}
-                inLibrary={inLibrary}
-                onImport={() => setImportTarget({ artist: tab.artist, title: tab.song })}
-              />
-            )
-          })}
-          <p className="text-center text-xs text-zinc-600 pt-2">{t('charts.source')}</p>
-        </div>
-      )}
+      <div className="space-y-2">
+        {ALL_TABS.map((tab, index) => {
+          const inLibrary = songs.some(
+            (s) =>
+              s.title.toLowerCase() === tab.song.toLowerCase() &&
+              s.artist.toLowerCase() === tab.artist.toLowerCase(),
+          )
+          return (
+            <ChartRow
+              key={tab.id}
+              rank={index + 1}
+              tab={tab}
+              inLibrary={inLibrary}
+              onImport={() => setImportTarget({ artist: tab.artist, title: tab.song })}
+            />
+          )
+        })}
+        <p className="text-center text-xs text-zinc-600 pt-2">{t('charts.source')}</p>
+      </div>
 
       <AddSongDialog
         open={importTarget !== null}
@@ -122,7 +81,6 @@ interface ChartRowProps {
 
 function ChartRow({ rank, tab, inLibrary, onImport }: ChartRowProps) {
   const { t } = useTranslation()
-  const stars = Math.round(tab.rating)
 
   return (
     <div className={cn(
@@ -139,23 +97,10 @@ function ChartRow({ rank, tab, inLibrary, onImport }: ChartRowProps) {
         {rank}
       </span>
 
-      {/* Title + meta */}
+      {/* Title + artist */}
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-zinc-100 truncate text-sm">{tab.song}</p>
         <p className="text-xs text-zinc-400 truncate">{tab.artist}</p>
-        {tab.rating > 0 && (
-          <div className="flex items-center gap-1 mt-0.5">
-            {Array.from({ length: 5 }, (_, i) => (
-              <Star
-                key={i}
-                className={cn('h-3 w-3', i < stars ? 'text-amber-400 fill-amber-400' : 'text-zinc-700')}
-              />
-            ))}
-            {tab.votes > 0 && (
-              <span className="text-xs text-zinc-600 ml-1">({tab.votes.toLocaleString()})</span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Actions */}
